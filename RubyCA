@@ -8,7 +8,10 @@ $root_dir = File.expand_path('..', __FILE__)
 require 'core/load'
 require 'core/bootstrap'
 
-# Configure and start Thin
-rack_app = Rack::URLMap.new '/' => RubyCA::Core::Web::Manager,  '/test' => RubyCA::Core::Web::Manager
-thin_server = Thin::Server.new CONFIG['web']['host'], CONFIG['web']['port'], rack_app
-thin_server.start
+# Start Thin
+Thin::Server.start(CONFIG['web']['host'], CONFIG['web']['port']) do
+  use Rack::CommonLogger
+  map "/" do
+    run RubyCA::Core::Web::Manager.new
+  end
+end
