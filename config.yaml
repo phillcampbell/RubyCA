@@ -1,11 +1,11 @@
-# Configuration for the web manager and CRL servers
+# Configuration for the web admin and CRL servers
 web:
   host: 'localhost'
   port: 8080
   crl:
-  # The manager is used to create, sign and revoke certificates
-  manager: 
-    allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web manager
+  # The admin is used to create, sign and revoke certificates
+  admin: 
+    allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
 
 # Configuration relating to certificate authority
 ca:

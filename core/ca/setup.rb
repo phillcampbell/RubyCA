@@ -1,7 +1,7 @@
 if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed to be called directly. Please run ./RubyCA instead.' end
 
 # Check if the root certificate exists, if not, continue with generation
-unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt")
+unless File.exist?($root_dir + "/private/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt")
   
   puts 'Root CA certificate not found. RubyCA will now generate the root and intermediate CA certificates.'
   
@@ -14,7 +14,7 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
 
 # Generate certificates  
   puts ''
-  puts "Warning: RubyCA will destroy the directories './keys' and './certificates' if they already exist."
+  puts "Warning: RubyCA will destroy the directories './private/keys' and './private/certificates' if they already exist."
   puts "Type 'YES' to continue, otherwise RubyCA will exit:"
   unless gets.chomp == 'YES' then abort end
 
@@ -22,12 +22,10 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   puts 'Generating root and intermediate certificates...'
   
   # Check folders and permissions
-  if Dir.exist? $root_dir + '/keys' then FileUtils.rm_r $root_dir + '/keys' end
-  Dir.mkdir $root_dir + '/keys', 0755
-  File.chmod 0755, $root_dir + '/keys'
-  if Dir.exist? $root_dir + '/certificates' then FileUtils.rm_r $root_dir + '/certificates' end
-  Dir.mkdir $root_dir + '/certificates', 0755
-  File.chmod 0755, $root_dir + '/certificates'
+  if Dir.exist? $root_dir + '/private/' then FileUtils.rm_r $root_dir + '/private/' end
+  Dir.mkdir $root_dir + '/private', 0755
+  Dir.mkdir $root_dir + '/private/keys', 0755
+  Dir.mkdir $root_dir + '/private/certificates', 0755
   
   # Common variables
   cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
@@ -38,7 +36,7 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   root_key = OpenSSL::PKey::RSA.new 2048
   puts ''
   puts 'You will now be asked to enter a pass phrase for the root CA key. This is not stored by RubyCA.'
-  open $root_dir + "/keys/#{CONFIG['ca']['root']['name']}_Root_CA.pem", 'w', 0400 do |io|
+  open $root_dir + "/private/keys/#{CONFIG['ca']['root']['name']}_Root_CA.pem", 'w', 0400 do |io|
     io.write root_key.export(cipher)
   end
   # Create root certificate
@@ -62,17 +60,19 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
   root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
-  open $root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
+  open $root_dir + "/private/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
+    io.write root_crt.to_pem
+  end 
+  open $root_dir + "/core/web/certificate_store/public/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
     io.write root_crt.to_pem
   end
-  
   # Generate intermediate certificate
   
   # Generate intermediate key
   intermediate_key = OpenSSL::PKey::RSA.new 2048
   puts ''
   puts 'You will now be asked to enter a pass phrase for the intermediate CA key. This is not stored by RubyCA.'
-  open $root_dir + "/keys/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.pem", 'w', 0400 do |io|
+  open $root_dir + "/private/keys/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.pem", 'w', 0400 do |io|
     io.write intermediate_key.export(cipher)
   end
   # Generate intermediate csr
@@ -90,27 +90,24 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   intermediate_crt.version = 2
   intermediate_crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
   intermediate_crt.not_after = intermediate_crt.not_before  + (CONFIG['ca']['intermediate']['years'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['intermediate']['years'] / 4).to_int * 24 * 60 * 60)
-
   intermediate_crt.subject = intermediate_csr.subject
   intermediate_crt.public_key = intermediate_csr.public_key
   intermediate_crt.issuer = root_crt.subject
-
   intermediate_ef = OpenSSL::X509::ExtensionFactory.new
   intermediate_ef.subject_certificate = intermediate_crt
   intermediate_ef.issuer_certificate = root_crt
-
   intermediate_crt.add_extension intermediate_ef.create_extension 'subjectKeyIdentifier', 'hash'
   intermediate_crt.add_extension intermediate_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
   intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
-
-
   intermediate_crt.sign root_key, OpenSSL::Digest::SHA512.new
-
-  open $root_dir + "/certificates/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
+  open $root_dir + "/private/certificates/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
+    io.write intermediate_crt.to_pem
+  end 
+  open $root_dir + "/core/web/certificate_store/public/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
     io.write intermediate_crt.to_pem
   end
-
+  
 # Finish up
   puts ''
   puts 'Sucessfully generated root and imtermediate certificates.'

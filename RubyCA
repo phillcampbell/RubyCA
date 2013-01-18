@@ -11,7 +11,10 @@ require 'core/bootstrap'
 # Start Thin
 Thin::Server.start(CONFIG['web']['host'], CONFIG['web']['port']) do
   use Rack::CommonLogger
-  map "/" do
-    run RubyCA::Core::Web::Manager.new
+  map "/admin" do
+    run RubyCA::Core::Web::Admin::Server.new
+  end
+  map "/certificates" do
+    run RubyCA::Core::Web::CertificateStore::Server.new
   end
 end

@@ -1,0 +1,12 @@
+!!!
+%html{:lang => "en"}
+  %head
+    %meta{:charset => "utf-8"}
+    %title RubyCA
+    %link{:href => "/bootstrap.min.css", :rel => "stylesheet"}
+    %link{:href => "/bootstrap-responsive.min.css", :rel => "stylesheet"}
+    %link{:href => "/rubyca.css", :rel => "stylesheet"}
+  %body
+    .container
+      = yield
+  %script{:src => "/bootstrap.min.js"}
