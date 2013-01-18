@@ -12,8 +12,8 @@ Currently, RubyCA will generate root and intermediate CA certificates. In the fu
 
 Clone and enter the repository
 
-    $ git clone https://github.com/phillcampbell/ruby_ca.git
-    $ cd ruby_ca
+    $ git clone https://github.com/phillcampbell/RubyCA.git
+    $ cd RubyCA
 
 Use bundle to install dependencies
 
