@@ -14,7 +14,7 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
 
 # Generate certificates  
   puts ''
-  puts "Warning, RubyCA will destroy the directories './keys' and './certificates' if they already exist."
+  puts "Warning: RubyCA will destroy the directories './keys' and './certificates' if they already exist."
   puts "Type 'YES' to continue, otherwise RubyCA will exit:"
   unless gets.chomp == 'YES' then abort end
 
@@ -60,7 +60,7 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   root_crt.add_extension root_ef.create_extension 'subjectKeyIdentifier', 'hash'
   root_crt.add_extension root_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['crl']['host']}/ca.crl"
+  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
   open $root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
     io.write root_crt.to_pem
@@ -102,7 +102,7 @@ unless File.exist?($root_dir + "/certificates/#{CONFIG['ca']['root']['name']}_Ro
   intermediate_crt.add_extension intermediate_ef.create_extension 'subjectKeyIdentifier', 'hash'
   intermediate_crt.add_extension intermediate_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['crl']['host']}/ca.crl"
+  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
 
 
   intermediate_crt.sign root_key, OpenSSL::Digest::SHA512.new
