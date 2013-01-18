@@ -18,6 +18,10 @@ Clone and enter the repository
 Use bundle to install dependencies
 
     $ bundle install
+    
+Edit the config.yaml file to suit your requirements
+
+    $ nano ./config.yaml
 
 RubyCA must be started as root on the first run to be able to generate the ca certificates
 
