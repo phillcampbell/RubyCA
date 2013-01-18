@@ -1,0 +1,8 @@
+
+.DS_Store
+*.pem
+*.crt
+
+core/ca/last_serial
+
+Gemfile.lock

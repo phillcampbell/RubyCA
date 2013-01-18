@@ -1,0 +1,27 @@
+# Configuration for the web manager and CRL servers
+web:
+  crl:
+    host: 'localhost'
+  # The manager is used to create, sign and revoke certificates
+  manager: 
+    enabled: false                              # Enables/disables the web manager
+    interface: 'localhost'                      # The interface to bind the web server to. Default 'localhost', use '0.0.0.0' for all interfaces
+    port: 8080                                  # The port to run the web manager on
+    allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web manager
+
+# Configuration relating to certificate authority
+ca:
+  root:
+    country: 'GB'
+    state: 'West Midlands'
+    locality: 'Birmingham'
+    name: "Phill's"
+    years: 20
+    passphrase: 'password'
+  intermediate:
+    country: 'GB'
+    state: 'West Midlands'
+    locality: 'Birmingham'
+    name: "Phill's"
+    years: 20
+    passphrase: 'password'
