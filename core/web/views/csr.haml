@@ -1,3 +1,37 @@
+%legend Certificate Signing Requests Awaiting Signature        
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %td #
+      %td Common Name
+      %td Organisation
+      %td Locality
+      %td State
+      %td Country Code
+      %td
+  %tbody
+    - @csrs.each do |csr|
+      %tr
+        %td 
+          = csr.id
+        %td 
+          = csr.cn
+        %td 
+          = csr.o
+        %td 
+          = csr.l
+        %td 
+          = csr.st
+        %td 
+          = csr.c
+        %td 
+          %button.btn.btn-primary 
+            %i.icon-white.icon-lock
+            Sign
+          %button.btn.btn-danger 
+            %i.icon-white.icon-remove
+            Delete
+
 %form#csr.form-horizontal{ action: '/admin/csr', method: 'post' }
   %fieldset
     %legend Create Certificate Signing Request
@@ -27,33 +61,4 @@
         %input#passphrase{ name: 'csr[passphrase]', type: 'text', placeholder: 'e.g. password' }
     .control-group
       .controls
-        %button.btn{ type: 'submit' } Submit
-
-%legend Certificate Signing Requests Awaiting Signature        
-%table.table.table-striped
-  %thead
-    %tr
-      %td #
-      %td Common Name
-      %td Organisation
-      %td Locality
-      %td State
-      %td Country Code
-      %td
-  %tbody
-    - @csrs.each do |csr|
-      %tr
-        %td 
-          = csr.id
-        %td 
-          = csr.cn
-        %td 
-          = csr.o
-        %td 
-          = csr.l
-        %td 
-          = csr.st
-        %td 
-          = csr.c
-        %td 
-          %button.btn Sign
+        %button.btn.btn-primary{ type: 'submit' } Submit
