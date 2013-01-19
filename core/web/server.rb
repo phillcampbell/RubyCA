@@ -1,21 +1,21 @@
 module RubyCA
   module Core
     module Web
-      module Admin
+
         class Server < Sinatra::Base
           set :haml, layout: :layout
         
-          before '*' do
+          before '/admin*' do
             unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
               halt 401, '401 Unauthorised'
             end
           end
         
-          get '/csr' do
+          get '/admin/csr' do
             haml :csr
           end
         
-          post '/sign' do
+          post '/admin/sign' do
             params[:csr]
             # cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
             # key = OpenSSL::PKey::RSA.new 2048
@@ -23,8 +23,7 @@ module RubyCA
             #   io.write key.export(cipher, params[:csr]['passphrase'])
             # end
           end
-        
-        end
+
       end
     end
   end

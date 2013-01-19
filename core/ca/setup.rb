@@ -63,7 +63,7 @@ unless File.exist?($root_dir + "/private/certificates/#{CONFIG['ca']['root']['na
   open $root_dir + "/private/certificates/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
     io.write root_crt.to_pem
   end 
-  open $root_dir + "/core/web/certificate_store/public/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
+  open $root_dir + "/core/web/public/#{CONFIG['ca']['root']['name']}_Root_CA.crt", 'w', 0444 do |io|
     io.write root_crt.to_pem
   end
   # Generate intermediate certificate
@@ -104,7 +104,7 @@ unless File.exist?($root_dir + "/private/certificates/#{CONFIG['ca']['root']['na
   open $root_dir + "/private/certificates/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
     io.write intermediate_crt.to_pem
   end 
-  open $root_dir + "/core/web/certificate_store/public/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
+  open $root_dir + "/core/web/public/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt", 'w' do |io|
     io.write intermediate_crt.to_pem
   end
   
