@@ -3,3 +3,5 @@
 *.crt
 core/ca/last_serial
 Gemfile.lock
+
+*.db

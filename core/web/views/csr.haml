@@ -1,6 +1,6 @@
-%form#csr.form-horizontal{ action: '/sign', method: 'post' }
+%form#csr.form-horizontal{ action: '/admin/csr', method: 'post' }
   %fieldset
-    %legend Certificate Signing Request
+    %legend Create Certificate Signing Request
     .control-group
       %label.control-label{ for: 'cn' } Common Name
       .controls
@@ -28,3 +28,32 @@
     .control-group
       .controls
         %button.btn{ type: 'submit' } Submit
+
+%legend Certificate Signing Requests Awaiting Signature        
+%table.table.table-striped
+  %thead
+    %tr
+      %td #
+      %td Common Name
+      %td Organisation
+      %td Locality
+      %td State
+      %td Country Code
+      %td
+  %tbody
+    - @csrs.each do |csr|
+      %tr
+        %td 
+          = csr.id
+        %td 
+          = csr.cn
+        %td 
+          = csr.o
+        %td 
+          = csr.l
+        %td 
+          = csr.st
+        %td 
+          = csr.c
+        %td 
+          %button.btn Sign

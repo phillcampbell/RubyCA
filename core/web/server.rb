@@ -12,7 +12,18 @@ module RubyCA
           end
         
           get '/admin/csr' do
+            @csrs = RubyCA::Core::Models::CSR.all
             haml :csr
+          end
+          
+          post '/admin/csr' do
+            @csr = RubyCA::Core::Models::CSR.create(
+                cn: params['csr']['cn'],
+                o: params['csr']['o'],
+                l: params['csr']['l'],
+                st: params['csr']['st'],
+                c: params['csr']['c'] )
+            redirect '/admin/csr'
           end
         
           post '/admin/sign' do
