@@ -3,6 +3,8 @@
 ## About
 RubyCA is a simple certificate authority manager written in Ruby.
 
+It is designed for internal use as an alternative to using self signed certificates. Install and trust the root certificate in your clients and any certificates you create will just work, no more browser warnings.
+
 ## Development
 RubyCA is currently in development and not all features are implemented. 
 
@@ -11,6 +13,8 @@ Currently, RubyCA will generate root and intermediate CA certificates. The web U
 In the future the web UI will support the Online Certificate Status Protocol (OCSP).
 
 The currently isn't much error checking, this will be added in the future.
+
+Pull requests welcome.
 
 ## Usage
 
@@ -31,3 +35,5 @@ Create the config.yaml file and edit to suit your requirements
 RubyCA must be started as root on the first run to be able to generate the ca certificates
 
     $ sudo ./RubyCA
+    
+Visit http://*host*:*port*/admin to manage certificates
