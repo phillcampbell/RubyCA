@@ -50,7 +50,7 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   root_crt.add_extension root_ef.create_extension 'subjectKeyIdentifier', 'hash'
   root_crt.add_extension root_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
+  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:#{CONFIG['web']['crl']}"
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @root_crt = RubyCA::Core::Models::Certificate.create( cn: "#{CONFIG['ca']['root']['cn']}" )
   @root_crt.crt = root_crt.to_pem
@@ -87,7 +87,7 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   intermediate_crt.add_extension intermediate_ef.create_extension 'subjectKeyIdentifier', 'hash'
   intermediate_crt.add_extension intermediate_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
+  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:#{CONFIG['web']['crl']}"
   intermediate_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @intermediate_crt.crt = intermediate_crt.to_pem
   @intermediate_crt.save

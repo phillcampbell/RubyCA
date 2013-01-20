@@ -83,7 +83,7 @@ module RubyCA
             crt_ef.issuer_certificate = intermediate_crt
             crt.add_extension crt_ef.create_extension 'keyUsage','digitalSignature', true
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
-            crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
+            crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:#{CONFIG['web']['crl']}"
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
             @crt.crt = crt.to_pem
             @crt.save

@@ -2,7 +2,7 @@ if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed
 
 require 'core/privileges'
 
-DataMapper::Logger.new($stdout, :debug)
+# DataMapper::Logger.new($stdout, :debug)
 DataMapper.setup(:default, "sqlite3://#{$root_dir}/RubyCA.db")
 require 'core/models/config'
 require 'core/models/csr'
