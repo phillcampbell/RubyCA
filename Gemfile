@@ -1,6 +1,7 @@
 source 'https://rubygems.org'
 
 gem 'sinatra'
+gem 'sinatra-flash'
 gem 'haml'
 gem 'dm-sqlite-adapter'
 gem 'dm-migrations'

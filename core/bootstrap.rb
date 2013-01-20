@@ -16,3 +16,4 @@ RubyCA::Core::Models::CRL.auto_upgrade!
 
 require 'core/ca/setup'
 require 'core/web/server'
+require 'core/web/flash'

@@ -6,6 +6,8 @@ module RubyCA
 
         class Server < Sinatra::Base
           use Rack::MethodOverride
+          enable :sessions
+          register Sinatra::Flash
           set :bind, CONFIG['web']['host']
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
@@ -33,6 +35,10 @@ module RubyCA
           end
           
           post '/admin/csrs' do
+            if RubyCA::Core::Models::CSR.get(params[:csr][:cn])
+              flash.next[:error] = "A certificate signing request already exists for '#{params[:csr][:cn]}'"
+              redirect '/admin/csrs'
+            end
             @csr = RubyCA::Core::Models::CSR.create(
                 cn: params[:csr][:cn],
                 o: params[:csr][:o],
@@ -49,6 +55,7 @@ module RubyCA
             csr.sign key, OpenSSL::Digest::SHA512.new
             @csr.csr = csr.to_pem
             @csr.save
+            flash.next[:success] = "Created certificate signing request for '#{@csr.cn}'"
             redirect '/admin/csrs'
           end
           
@@ -64,6 +71,10 @@ module RubyCA
           end
         
           post '/admin/csrs/:cn/sign' do
+            if RubyCA::Core::Models::Certificate.get(params[:cn])
+              flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
+              redirect '/admin/csrs'
+            end
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
             crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
@@ -93,6 +104,7 @@ module RubyCA
             @crt.save
             @csr.destroy
             intermediate_key = nil
+            flash.next[:success] = "Created certificate for '#{@crt.cn}'"
             redirect '/admin/certificates'
           end
           
@@ -120,6 +132,10 @@ module RubyCA
           
           delete '/admin/certificates/:cn/revoke' do
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            if @crt.cn == CONFIG['ca']['root']['cn'] or CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Cannot revoke the root or intermediate certificates"
+              redirect '/admin/certificates'
+            end
             crt = OpenSSL::X509::Certificate.new RubyCA::Core::Models::Certificate.get(@crt.cn).crt
             revoked = OpenSSL::X509::Revoked.new
             revoked.serial = crt.serial
@@ -136,6 +152,7 @@ module RubyCA
             @crl.crl = crl.to_pem
             @crl.save
             @crt.destroy
+            flash.next[:success] = "Revoked certificate for '#{@crt.cn}'"
             redirect '/admin/certificates'
           end
 
