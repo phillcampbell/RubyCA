@@ -1,3 +1,5 @@
+if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed to be called directly. Please run ./RubyCA instead.' end
+
 module RubyCA
   module Core
     class Privileges
@@ -23,16 +25,16 @@ module RubyCA
 end
 
 # Overrride to drop privileges after opening port in WEBrick
-module WEBrick
-  GenericServer.class_eval do 
-    
-    def listen(address, port)
-      @listeners += Utils::create_listeners(address, port, @logger)
-      RubyCA::Core::Privileges.drop
-    end
-    
-  end
-end
+# module WEBrick
+#   GenericServer.class_eval do 
+#     
+#     def listen(address, port)
+#       @listeners += Utils::create_listeners(address, port, @logger)
+#       RubyCA::Core::Privileges.drop
+#     end
+#     
+#   end
+# end
 
 # Overrride to drop privileges after opening port in Thin
 module EventMachine
