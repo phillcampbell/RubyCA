@@ -8,7 +8,7 @@ module RubyCA
           use Rack::MethodOverride
           enable :sessions
           register Sinatra::Flash
-          set :bind, CONFIG['web']['host']
+          set :bind, CONFIG['web']['interface']
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
           mime_type :pem, 'pem/pem'
