@@ -1,0 +1,31 @@
+# Configuration for the web UI
+web:
+  domain: 'localhost' # The domain name to use
+  interface: 'localhost' # The interface to bind the web server to, use '0.0.0.0' for all interfaces
+  port: 80 # The port the web server will run on
+  admin: 
+    allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
+
+privileges:
+  user: 'user' # The user to run as once privileges are dropped
+  group: 'group' # The group to run as once privileges are dropped
+  
+certificate:
+  years: 1 # Number of years certificates will be valid
+  
+# Configuration relating to certificate authority
+ca:
+  root:
+    country: 'GB'
+    state: 'My State'
+    locality: 'My Locality'
+    organisation: "My Root CA"
+    cn: "My Root Certificate Authority"
+    years: 20
+  intermediate:
+    country: 'GB'
+    state: 'My State'
+    locality: 'My Locality'
+    organisation: "My Intermediate CA"
+    cn: "My Intermediate Certificate Authority"
+    years: 20
