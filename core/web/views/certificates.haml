@@ -4,7 +4,7 @@
     %tr
       %td #
       %td Common Name
-      %td
+      %td Download Files
   %tbody
     - @certificates.each do |crt|
       %tr
@@ -13,11 +13,5 @@
         %td 
           = crt.cn
         %td 
-          / %form{ :action => "/admin/csr/#{csr.id}", :method => 'POST' }
-          /   %a.btn.btn-primary{ href: "/admin/csr/#{csr.id}/sign" }
-          /     %i.icon-white.icon-lock
-          /     Sign
-          /   %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-          /   %button.btn.btn-danger{ :type => 'submit' }
-          /     %i.icon-white.icon-remove
-          /     Delete
+          %a.btn.btn-primary{ href: "/admin/certificates/#{crt.id}.crt" } Certificate
+          %a.btn{ href: "/admin/certificates/#{crt.id}.pem" } Private Key

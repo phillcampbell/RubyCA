@@ -7,6 +7,7 @@ module RubyCA
           set :bind, CONFIG['web']['host']
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
+          mime_type :pem, 'pem/pem'
         
           before '/admin*' do
             unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
@@ -84,6 +85,18 @@ module RubyCA
           get '/admin/certificates' do
             @certificates = RubyCA::Core::Models::Certificate.all
             haml :certificates
+          end
+          
+          get '/admin/certificates/:id.crt' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:id])
+            content_type :crt
+            @crt.crt
+          end
+          
+          get '/admin/certificates/:id.pem' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:id])
+            content_type :pem
+            @crt.pkey
           end
 
       end
