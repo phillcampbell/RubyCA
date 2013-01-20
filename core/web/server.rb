@@ -71,6 +71,10 @@ module RubyCA
           end
           
           get '/admin/csrs/:cn/sign/?' do
+            if RubyCA::Core::Models::Certificate.get(params[:cn])
+              flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
+              redirect '/admin/csrs'
+            end
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             haml :sign
           end
@@ -81,10 +85,20 @@ module RubyCA
               redirect '/admin/csrs'
             end
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
-            @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
-            crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
+            begin
+              crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
+            rescue OpenSSL::PKey::RSAError
+              flash.next[:error] = "Incorrect certificate passphrase"
+              redirect "/admin/csrs/#{params[:cn]}/sign"
+            end
             @intermediate = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn'])
-            intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
+            begin
+              intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
+            rescue OpenSSL::PKey::RSAError
+              flash.next[:error] = "Incorrect intermediate passphrase"
+              redirect "/admin/csrs/#{params[:cn]}/sign"
+            end
+            @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
             csr = OpenSSL::X509::Request.new @csr.csr
             intermediate_crt = OpenSSL::X509::Certificate.new @intermediate.crt
             crt = OpenSSL::X509::Certificate.new
@@ -162,7 +176,12 @@ module RubyCA
             revoked.serial = crt.serial
             revoked.time = Time.now
             @intermediate = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn'])
-            intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
+            begin
+              intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
+            rescue OpenSSL::PKey::RSAError
+              flash.next[:error] = "Incorrect intermediate passphrase"
+              redirect "/admin/certificates/#{params[:cn]}/revoke"
+            end
             @crl = RubyCA::Core::Models::CRL.get(1)
             crl = OpenSSL::X509::CRL.new @crl.crl
             crl.add_revoked revoked
