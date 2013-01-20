@@ -6,7 +6,9 @@ RubyCA is a simple certificate authority manager written in Ruby.
 ## Development
 RubyCA is currently in development and not all features are implemented. 
 
-Currently, RubyCA will generate root and intermediate CA certificates. In the future RubyCA will have a web UI for creating, signing and revoking certificates and will support certificate revocation lists and the Online Certificate Status Protocol (OCSP).
+Currently, RubyCA will generate root and intermediate CA certificates. The web UI can be used to create signing requests and certificates, as well as to download certificates and keys. In the future the web UI will support certificate revocation lists and the Online Certificate Status Protocol (OCSP).
+
+The currently isn't much error checking, this will be added in the future.
 
 ## Usage
 
