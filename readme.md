@@ -36,4 +36,4 @@ RubyCA must be started as root on the first run to be able to generate the ca ce
 
     $ sudo ./RubyCA
     
-Visit http://*host*:*port*/admin to manage certificates
+Visit http:// *host* : *port* /admin to manage certificates
