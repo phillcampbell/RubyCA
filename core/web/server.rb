@@ -19,22 +19,26 @@ module RubyCA
             end
           end
           
+          get '/' do
+            redirect '/admin'
+          end
+          
           get '/ca.crl' do
             @crl = OpenSSL::X509::CRL.new RubyCA::Core::Models::CRL.get(1).crl
             content_type :crl
             @crl.to_der
           end
           
-          get '/admin' do
+          get '/admin/?' do
             haml :admin
           end
         
-          get '/admin/csrs' do
+          get '/admin/csrs/?' do
             @csrs = RubyCA::Core::Models::CSR.all
             haml :csrs
           end
           
-          post '/admin/csrs' do
+          post '/admin/csrs/?' do
             if RubyCA::Core::Models::CSR.get(params[:csr][:cn])
               flash.next[:error] = "A certificate signing request already exists for '#{params[:csr][:cn]}'"
               redirect '/admin/csrs'
@@ -59,18 +63,19 @@ module RubyCA
             redirect '/admin/csrs'
           end
           
-          delete '/admin/csrs/:cn' do
+          delete '/admin/csrs/:cn/?' do
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             @csr.destroy
+            flash.next[:success] = "Deleted certificate signing request for '#{@csr.cn}'"
             redirect '/admin/csrs'
           end
           
-          get '/admin/csrs/:cn/sign' do
+          get '/admin/csrs/:cn/sign/?' do
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             haml :sign
           end
         
-          post '/admin/csrs/:cn/sign' do
+          post '/admin/csrs/:cn/sign/?' do
             if RubyCA::Core::Models::Certificate.get(params[:cn])
               flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
               redirect '/admin/csrs'
@@ -108,7 +113,7 @@ module RubyCA
             redirect '/admin/certificates'
           end
           
-          get '/admin/certificates' do
+          get '/admin/certificates/?' do
             @certificates = RubyCA::Core::Models::Certificate.all
             haml :certificates
           end
@@ -125,14 +130,18 @@ module RubyCA
             @crt.pkey
           end
           
-          get '/admin/certificates/:cn/revoke' do
+          get '/admin/certificates/:cn/revoke/?' do
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Cannot revoke the root or intermediate certificates"
+              redirect '/admin/certificates'
+            end
             haml :revoke
           end
           
-          delete '/admin/certificates/:cn/revoke' do
+          delete '/admin/certificates/:cn/revoke/?' do
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
-            if @crt.cn == CONFIG['ca']['root']['cn'] or CONFIG['ca']['intermediate']['cn']
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
               flash.next[:error] = "Cannot revoke the root or intermediate certificates"
               redirect '/admin/certificates'
             end

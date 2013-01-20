@@ -1,35 +1,36 @@
-%legend Certificate Signing Requests Awaiting Signature        
-%table.table.table-striped.table-hover
-  %thead
-    %tr
-      %td Common Name
-      %td Organisation
-      %td Locality
-      %td State
-      %td Country Code
-      %td
-  %tbody
-    - @csrs.each do |csr|
+- if @csrs.any?
+  %legend Certificate Signing Requests Awaiting Signature        
+  %table.table.table-striped.table-hover
+    %thead
       %tr
-        %td 
-          = csr.cn
-        %td 
-          = csr.o
-        %td 
-          = csr.l
-        %td 
-          = csr.st
-        %td 
-          = csr.c
-        %td 
-          %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
-            %a.btn.btn-primary{ href: "/admin/csrs/#{csr.cn}/sign" }
-              %i.icon-white.icon-lock
-              Sign
-            %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-            %button.btn.btn-danger{ :type => 'submit' }
-              %i.icon-white.icon-remove
-              Delete
+        %td Common Name
+        %td Organisation
+        %td Locality
+        %td State
+        %td Country Code
+        %td
+    %tbody
+      - @csrs.each do |csr|
+        %tr
+          %td 
+            = csr.cn
+          %td 
+            = csr.o
+          %td 
+            = csr.l
+          %td 
+            = csr.st
+          %td 
+            = csr.c
+          %td 
+            %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
+              %a.btn.btn-primary{ href: "/admin/csrs/#{csr.cn}/sign" }
+                %i.icon-white.icon-lock
+                Sign
+              %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+              %button.btn.btn-danger{ :type => 'submit' }
+                %i.icon-white.icon-remove
+                Delete
 
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset
