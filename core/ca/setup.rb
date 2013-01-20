@@ -3,6 +3,13 @@ if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed
 # Check if the root certificate exists, if not, continue with generation
 unless RubyCA::Core::Models::Config.get('first_run_complete')
   
+  unless Process.euid == 0 
+    puts ''
+    puts 'Error: RubyCA requires root permissions to generate CA certificates, root privileges are dropped once the server starts.'
+    puts "Please run RubyCA using 'sudo ./RubyCA'."
+    abort
+  end
+  
   puts ''
   puts 'This appears to be RubyCA\'s first run. RubyCA will now generate the root and intermediate CA certificates.'
 
