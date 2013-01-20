@@ -6,9 +6,11 @@ DataMapper::Logger.new($stdout, :debug)
 DataMapper::setup(:default, "sqlite3://#{$root_dir}/RubyCA.db")
 require 'core/models/csr'
 DataMapper.finalize
-RubyCA::Core::Models::CSR.auto_upgrade!
+RubyCA::Core::Models::CSR.auto_upgrade! 
 
 require 'core/ca/setup'
+
+ENC_INT_KEY = File.read($root_dir + "/private/keys/#{CONFIG['ca']['root']['name']}_Root_CA.pem")
 
 require 'core/web/server'
 # require 'core/web/certificate_store/server'

@@ -1,0 +1,39 @@
+%legend Selected Certificate Signing Request
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %td #
+      %td Common Name
+      %td Organisation
+      %td Locality
+      %td State
+      %td Country Code
+  %tbody
+    %tr
+      %td 
+        = @csr.id
+      %td 
+        = @csr.cn
+      %td 
+        = @csr.o
+      %td 
+        = @csr.l
+      %td 
+        = @csr.st
+      %td 
+        = @csr.c
+
+%form#csr.form-horizontal{ action: "/admin/csr/#{@csr.id}/sign", method: 'post' }
+  %fieldset
+    %legend Enter Passphrases to Sign CSR
+    .control-group
+      %label.control-label{ for: 'intermediate' } Intermediate CA Key
+      .controls
+        %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
+    .control-group
+      %label.control-label{ for: 'certificate' } Certificate Key
+      .controls
+        %input#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
+    .control-group
+      .controls
+        %button.btn.btn-primary{ type: 'submit' } Create Certificate

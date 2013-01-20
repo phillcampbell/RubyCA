@@ -7,6 +7,12 @@ web:
   admin: 
     allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
 
+privileges:
+  user: 'phill'
+  group: 'staff'
+  
+certificate:
+  years: 1
 # Configuration relating to certificate authority
 ca:
   root:

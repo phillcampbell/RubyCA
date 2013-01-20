@@ -6,7 +6,7 @@ module RubyCA
         # Drop privileges
         puts ''
         puts 'Dropping privileges...'
-        Process::Sys.setuid(Etc.getpwnam('nobody').uid)
+        Process::Sys.setuid(Etc.getpwnam(CONFIG['privileges']['user']).uid)
         # Check RubyCA has drops its privileges successfully
         begin
           Process::Sys.setuid(0)

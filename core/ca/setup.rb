@@ -112,8 +112,6 @@ unless File.exist?($root_dir + "/private/certificates/#{CONFIG['ca']['root']['na
   puts ''
   puts 'Sucessfully generated root and imtermediate certificates.'
   
-  RubyCA::Core::Privileges.drop
-  
   puts ''
   puts '******************************************************************'
   puts '* Warning: Although the root and intermediate keys are encrypted *'

@@ -25,12 +25,14 @@
         %td 
           = csr.c
         %td 
-          %button.btn.btn-primary 
-            %i.icon-white.icon-lock
-            Sign
-          %button.btn.btn-danger 
-            %i.icon-white.icon-remove
-            Delete
+          %form{ :action => "/admin/csr/#{csr.id}", :method => 'POST' }
+            %a.btn.btn-primary{ href: "/admin/csr/#{csr.id}/sign" }
+              %i.icon-white.icon-lock
+              Sign
+            %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+            %button.btn.btn-danger{ :type => 'submit' }
+              %i.icon-white.icon-remove
+              Delete
 
 %form#csr.form-horizontal{ action: '/admin/csr', method: 'post' }
   %fieldset
