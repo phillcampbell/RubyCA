@@ -4,8 +4,7 @@ module RubyCA
     
       class Certificate
           include DataMapper::Resource
-          property :id, Serial
-          property :cn, String, required: true
+          property :cn, String, unique: true, key: true
           property :crt, Text
           property :pkey, Text
       end

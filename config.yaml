@@ -19,11 +19,13 @@ ca:
     country: 'GB'
     state: 'West Midlands'
     locality: 'Birmingham'
-    name: "Phill's"
+    organisation: "Phill's Root CA"
+    cn: "Phill's Root Certificate Authority"
     years: 20
   intermediate:
     country: 'GB'
     state: 'West Midlands'
     locality: 'Birmingham'
-    name: "Phill's"
+    organisation: "Phill's Intermediate CA"
+    cn: "Phill's Intermediate Certificate Authority"
     years: 20

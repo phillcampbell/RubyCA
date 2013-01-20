@@ -2,7 +2,6 @@
 %table.table.table-striped.table-hover
   %thead
     %tr
-      %td #
       %td Common Name
       %td Organisation
       %td Locality
@@ -10,8 +9,6 @@
       %td Country Code
   %tbody
     %tr
-      %td 
-        = @csr.id
       %td 
         = @csr.cn
       %td 
@@ -23,7 +20,7 @@
       %td 
         = @csr.c
 
-%form#csr.form-horizontal{ action: "/admin/csr/#{@csr.id}/sign", method: 'post' }
+%form#csr.form-horizontal{ action: "/admin/csrs/#{@csr.cn}/sign", method: 'post' }
   %fieldset
     %legend Enter Passphrases to Sign CSR
     .control-group

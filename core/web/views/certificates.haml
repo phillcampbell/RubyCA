@@ -2,16 +2,13 @@
 %table.table.table-striped.table-hover
   %thead
     %tr
-      %td #
       %td Common Name
       %td Download Files
   %tbody
     - @certificates.each do |crt|
       %tr
         %td 
-          = crt.id
-        %td 
           = crt.cn
         %td 
-          %a.btn.btn-primary{ href: "/admin/certificates/#{crt.id}.crt" } Certificate
-          %a.btn{ href: "/admin/certificates/#{crt.id}.pem" } Private Key
+          %a.btn.btn-primary{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
+          %a.btn{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key

@@ -4,8 +4,8 @@ module RubyCA
     
       class Config
           include DataMapper::Resource
-          property :name, Text, unique: true, key: true
-          property :value, Text, required: true
+          property :name, String, unique: true, key: true
+          property :value, String, required: true
       end
     
     end

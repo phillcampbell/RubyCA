@@ -4,8 +4,7 @@ module RubyCA
     
       class CSR
           include DataMapper::Resource
-          property :id, Serial
-          property :cn, String, required: true
+          property :cn, String, unique: true, key: true
           property :o, String, required: true
           property :l, String, required: true
           property :st, String, required: true

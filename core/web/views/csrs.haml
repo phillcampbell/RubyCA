@@ -2,7 +2,6 @@
 %table.table.table-striped.table-hover
   %thead
     %tr
-      %td #
       %td Common Name
       %td Organisation
       %td Locality
@@ -12,8 +11,6 @@
   %tbody
     - @csrs.each do |csr|
       %tr
-        %td 
-          = csr.id
         %td 
           = csr.cn
         %td 
@@ -25,8 +22,8 @@
         %td 
           = csr.c
         %td 
-          %form{ :action => "/admin/csrs/#{csr.id}", :method => 'POST' }
-            %a.btn.btn-primary{ href: "/admin/csrs/#{csr.id}/sign" }
+          %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
+            %a.btn.btn-primary{ href: "/admin/csrs/#{csr.cn}/sign" }
               %i.icon-white.icon-lock
               Sign
             %input{ type: 'hidden', name: '_method', value: 'DELETE' } 

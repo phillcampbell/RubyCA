@@ -40,29 +40,30 @@ module RubyCA
             redirect '/admin/csrs'
           end
           
-          delete '/admin/csrs/:id' do
-            @csr = RubyCA::Core::Models::CSR.get(params[:id])
+          delete '/admin/csrs/:cn' do
+            @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             @csr.destroy
             redirect '/admin/csrs'
           end
           
-          get '/admin/csrs/:id/sign' do
-            @csr = RubyCA::Core::Models::CSR.get(params[:id])
+          get '/admin/csrs/:cn/sign' do
+            @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             haml :sign
           end
         
-          post '/admin/csrs/:id/sign' do
-            @csr = RubyCA::Core::Models::CSR.get(params[:id])
+          post '/admin/csrs/:cn/sign' do
+            @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
             crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
-            intermediate_key = OpenSSL::PKey::RSA.new ENC_INT_KEY, params[:passphrase][:intermediate]
+            @intermediate = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn'])
+            intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
             csr = OpenSSL::X509::Request.new @csr.csr
-            intermediate_crt = OpenSSL::X509::Certificate.new File.read $root_dir + "/core/web/public/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt"
+            intermediate_crt = OpenSSL::X509::Certificate.new @intermediate.crt
             crt = OpenSSL::X509::Certificate.new
-            crt.serial = IO.binread($root_dir + '/core/ca/last_serial').to_i + 1
-            open $root_dir + '/core/ca/last_serial', 'w' do |io|
-              io.write crt.serial
-            end
+            @serial = RubyCA::Core::Models::Config.get('last_serial')
+            crt.serial = @serial.value.to_i + 1
+            @serial.value = crt.serial.to_s
+            @serial.save
             crt.version = 2
             crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
             crt.not_after = crt.not_before  + (CONFIG['certificate']['years'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['certificate']['years'] / 4).to_int * 24 * 60 * 60)
@@ -79,6 +80,7 @@ module RubyCA
             @crt.crt = crt.to_pem
             @crt.save
             @csr.destroy
+            intermediate_key = nil
             redirect '/admin/certificates'
           end
           
@@ -87,14 +89,14 @@ module RubyCA
             haml :certificates
           end
           
-          get '/admin/certificates/:id.crt' do
-            @crt = RubyCA::Core::Models::Certificate.get(params[:id])
+          get '/admin/certificates/:cn.crt' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
             content_type :crt
             @crt.crt
           end
           
-          get '/admin/certificates/:id.pem' do
-            @crt = RubyCA::Core::Models::Certificate.get(params[:id])
+          get '/admin/certificates/:cn.pem' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
             content_type :pem
             @crt.pkey
           end
