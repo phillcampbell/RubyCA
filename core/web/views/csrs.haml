@@ -25,8 +25,8 @@
         %td 
           = csr.c
         %td 
-          %form{ :action => "/admin/csr/#{csr.id}", :method => 'POST' }
-            %a.btn.btn-primary{ href: "/admin/csr/#{csr.id}/sign" }
+          %form{ :action => "/admin/csrs/#{csr.id}", :method => 'POST' }
+            %a.btn.btn-primary{ href: "/admin/csrs/#{csr.id}/sign" }
               %i.icon-white.icon-lock
               Sign
             %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
@@ -34,7 +34,7 @@
               %i.icon-white.icon-remove
               Delete
 
-%form#csr.form-horizontal{ action: '/admin/csr', method: 'post' }
+%form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset
     %legend Create Certificate Signing Request
     .control-group

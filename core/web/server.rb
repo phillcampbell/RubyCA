@@ -14,12 +14,12 @@ module RubyCA
             end
           end
         
-          get '/admin/csr' do
+          get '/admin/csrs' do
             @csrs = RubyCA::Core::Models::CSR.all
-            haml :csr
+            haml :csrs
           end
           
-          post '/admin/csr' do
+          post '/admin/csrs' do
             @csr = RubyCA::Core::Models::CSR.create(
                 cn: params[:csr][:cn],
                 o: params[:csr][:o],
@@ -36,21 +36,21 @@ module RubyCA
             csr.sign key, OpenSSL::Digest::SHA512.new
             @csr.csr = csr.to_pem
             @csr.save
-            redirect '/admin/csr'
+            redirect '/admin/csrs'
           end
           
-          delete '/admin/csr/:id' do
+          delete '/admin/csrs/:id' do
             @csr = RubyCA::Core::Models::CSR.get(params[:id])
             @csr.destroy
-            redirect '/admin/csr'
+            redirect '/admin/csrs'
           end
           
-          get '/admin/csr/:id/sign' do
+          get '/admin/csrs/:id/sign' do
             @csr = RubyCA::Core::Models::CSR.get(params[:id])
             haml :sign
           end
         
-          post '/admin/csr/:id/sign' do
+          post '/admin/csrs/:id/sign' do
             @csr = RubyCA::Core::Models::CSR.get(params[:id])
             @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
             crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]

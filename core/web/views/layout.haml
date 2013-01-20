@@ -7,6 +7,15 @@
     %link{:href => "/bootstrap-responsive.min.css", :rel => "stylesheet"}
     %link{:href => "/rubyca.css", :rel => "stylesheet"}
   %body
+    .navbar.navbar-fixed-top.navbar-inverse
+      .navbar-inner
+        .container
+          %a.brand{ href: '#' } RubyCA
+          %ul.nav
+            %li
+              %a{ href: '/admin/certificates' } Certificates
+            %li
+              %a{ href: '/admin/csrs' } Signing Requests
     .container
       = yield
   %script{:src => "/bootstrap.min.js"}
