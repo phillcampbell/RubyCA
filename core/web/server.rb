@@ -22,6 +22,10 @@ module RubyCA
             content_type :crl
             @crl.to_der
           end
+          
+          get '/admin' do
+            haml :admin
+          end
         
           get '/admin/csrs' do
             @csrs = RubyCA::Core::Models::CSR.all
