@@ -124,6 +124,18 @@ module RubyCA
             @crt.crt
           end
           
+          get '/admin/certificates/chain/:cn.crt' do
+            output = RubyCA::Core::Models::Certificate.get(params[:cn]).crt
+            unless params[:cn] === CONFIG['ca']['root']['cn'] or params[:cn] === CONFIG['ca']['intermediate']['cn']
+              output << RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn']).crt
+            end
+            unless params[:cn] === CONFIG['ca']['root']['cn']
+              output << RubyCA::Core::Models::Certificate.get(CONFIG['ca']['root']['cn']).crt
+            end
+            content_type :crt
+            output
+          end
+          
           get '/admin/certificates/:cn.pem' do
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
             content_type :pem
