@@ -37,3 +37,13 @@ RubyCA must be started as root on the first run to be able to generate the ca ce
     $ sudo ./RubyCA
     
 Visit http:// *host* : *port* /admin to manage certificates
+
+## Tips
+
+RubyCA will be able to be ran as a daemon if the future, but for now you can use 'screen' to run it in the background.
+
+    $ screen -S 'RubyCA' -d -m ./RubyCA
+    
+You can then access the running screen session with:
+    
+    $ screen -r 'RubyCA'
