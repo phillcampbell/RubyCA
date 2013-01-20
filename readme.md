@@ -23,8 +23,9 @@ Use bundle to install dependencies
 
     $ bundle install
     
-Edit the config.yaml file to suit your requirements
+Create the config.yaml file to suit your requirements
 
+    $ cp ./config.yaml.sample ./config.yaml
     $ nano ./config.yaml
 
 RubyCA must be started as root on the first run to be able to generate the ca certificates
