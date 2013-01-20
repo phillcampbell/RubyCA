@@ -112,19 +112,7 @@ unless File.exist?($root_dir + "/private/certificates/#{CONFIG['ca']['root']['na
   puts ''
   puts 'Sucessfully generated root and imtermediate certificates.'
   
-# Drop privileges
-  puts ''
-  puts 'Dropping privileges...'
-  Process::Sys.setuid(Etc.getpwnam('nobody').uid)
-  # Check RubyCA has drops its privileges successfully
-  begin
-    Process::Sys.setuid(0)
-  rescue Errno::EPERM
-    puts "Successfully dropped privileges. RubyCA is now '#{Etc.getpwuid(Process.euid).name}'"
-  else
-    puts 'Error: Failed to drop privileges, RubyCA will now exit.'
-    abort
-  end
+  RubyCA::Core::Privileges.drop
   
   puts ''
   puts '******************************************************************'

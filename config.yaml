@@ -1,7 +1,7 @@
 # Configuration for the web admin and CRL servers
 web:
-  host: 'localhost'
-  port: 8080
+  host: '127.0.0.1'
+  port: 80
   crl:
   # The admin is used to create, sign and revoke certificates
   admin: 

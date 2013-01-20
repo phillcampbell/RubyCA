@@ -3,6 +3,9 @@ module RubyCA
     module Web
 
         class Server < Sinatra::Base
+          
+          set :bind, CONFIG['web']['host']
+          set :port, CONFIG['web']['port']
           set :haml, layout: :layout
         
           before '/admin*' do

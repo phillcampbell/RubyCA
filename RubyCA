@@ -8,10 +8,16 @@ $root_dir = File.expand_path('..', __FILE__)
 require 'core/load'
 require 'core/bootstrap'
 
-# Start Thin
-Thin::Server.start(CONFIG['web']['host'], CONFIG['web']['port']) do
-  use Rack::CommonLogger
-  map "/" do
-    run RubyCA::Core::Web::Server.new
+# Start server
+if CONFIG['web']['port'] < 1024
+  unless Process.euid == 0 
+    puts ''
+    puts 'Error: RubyCA requires root permissions to bind to ports below 1024.'
+    puts "Please run RubyCA using 'sudo ./RubyCA'."
+    abort
   end
 end
+
+RubyCA::Core::Web::Server.run!
+
+puts ''
