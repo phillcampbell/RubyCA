@@ -16,6 +16,12 @@ module RubyCA
               halt 401, '401 Unauthorised'
             end
           end
+          
+          get '/ca.crl' do
+            @crl = OpenSSL::X509::CRL.new RubyCA::Core::Models::CRL.get(1).crl
+            content_type :crl
+            @crl.to_der
+          end
         
           get '/admin/csrs' do
             @csrs = RubyCA::Core::Models::CSR.all
@@ -101,6 +107,32 @@ module RubyCA
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
             content_type :pem
             @crt.pkey
+          end
+          
+          get '/admin/certificates/:cn/revoke' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            haml :revoke
+          end
+          
+          delete '/admin/certificates/:cn/revoke' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            crt = OpenSSL::X509::Certificate.new RubyCA::Core::Models::Certificate.get(@crt.cn).crt
+            revoked = OpenSSL::X509::Revoked.new
+            revoked.serial = crt.serial
+            revoked.time = Time.now
+            @intermediate = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn'])
+            intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
+            @crl = RubyCA::Core::Models::CRL.get(1)
+            crl = OpenSSL::X509::CRL.new @crl.crl
+            crl.add_revoked revoked
+            crl.last_update = Time.now
+            crl.next_update = Time.now + 60 * 60 * 24 * 30
+            crl.sign intermediate_key, OpenSSL::Digest::SHA512.new
+            intermediate_key = nil
+            @crl.crl = crl.to_pem
+            @crl.save
+            @crt.destroy
+            redirect '/admin/certificates'
           end
 
       end

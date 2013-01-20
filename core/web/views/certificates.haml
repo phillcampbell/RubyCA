@@ -4,6 +4,7 @@
     %tr
       %td Common Name
       %td Download Files
+      %td 
   %tbody
     - @certificates.each do |crt|
       %tr
@@ -12,3 +13,7 @@
         %td 
           %a.btn.btn-primary{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
           %a.btn{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
+        %td 
+          %a.btn.btn-danger{ :href => "/admin/certificates/#{crt.cn}/revoke" }
+            %i.icon-white.icon-remove
+            Revoke

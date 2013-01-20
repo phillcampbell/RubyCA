@@ -92,6 +92,15 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   @intermediate_crt.crt = intermediate_crt.to_pem
   @intermediate_crt.save
   
+  # Create CRL
+  crl = OpenSSL::X509::CRL.new
+  crl.version = 1
+  crl.issuer = intermediate_crt.subject
+  crl.last_update = Time.now
+  crl.next_update = Time.now + 60 * 60 * 24 * 30
+  crl.sign intermediate_key, OpenSSL::Digest::SHA512.new
+  @crl = RubyCA::Core::Models::CRL.create( crl: crl.to_pem )
+  
 # Finish up
   puts ''
   puts 'Sucessfully generated root and imtermediate certificates.'

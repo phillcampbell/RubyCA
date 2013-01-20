@@ -1,0 +1,23 @@
+%legend Revoke Certificate
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %td Common Name
+  %tbody
+    %tr
+      %td 
+        = @crt.cn
+
+%form#csr.form-horizontal{ action: "/admin/certificates/#{@crt.cn}/revoke", method: 'post' }
+  %fieldset
+    %legend Enter Intermediate Passphrase to Revoke Certificate
+    .control-group
+      %label.control-label{ for: 'intermediate' } Intermediate CA Key
+      .controls
+        %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
+    .control-group
+      .controls
+        %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+        %button.btn.btn-danger{ :type => 'submit' }
+          %i.icon-white.icon-remove
+          Revoke
