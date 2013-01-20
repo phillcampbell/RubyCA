@@ -21,11 +21,9 @@ ca:
     locality: 'Birmingham'
     name: "Phill's"
     years: 20
-    passphrase: 'password'
   intermediate:
     country: 'GB'
     state: 'West Midlands'
     locality: 'Birmingham'
     name: "Phill's"
     years: 20
-    passphrase: 'password'
