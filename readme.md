@@ -23,7 +23,7 @@ Use bundle to install dependencies
 
     $ bundle install
     
-Create the config.yaml file to suit your requirements
+Create the config.yaml file and edit to suit your requirements
 
     $ cp ./config.yaml.sample ./config.yaml
     $ nano ./config.yaml
