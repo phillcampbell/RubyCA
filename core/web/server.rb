@@ -28,24 +28,19 @@ module RubyCA
                 c: params[:csr][:c] )
             cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
             key = OpenSSL::PKey::RSA.new 2048
-            open $root_dir + "/keys/#{@csr.id}-#{@csr.cn}.pem", 'w' do |io|
-              io.write key.export(cipher, params[:csr][:passphrase])
-            end
+            @csr.pkey = key.export(cipher, params[:csr][:passphrase])
             csr = OpenSSL::X509::Request.new
             csr.version = 2
             csr.subject = OpenSSL::X509::Name.parse "C=#{@csr.c}/ST=#{@csr.st}/L=#{@csr.l}/O=#{@csr.o}/CN=#{@csr.cn}"
             csr.public_key = key.public_key
             csr.sign key, OpenSSL::Digest::SHA512.new
-            open $root_dir + "/csrs/#{@csr.id}-#{@csr.cn}.pem", 'w' do |io|
-              io.write csr.to_pem
-            end
+            @csr.csr = csr.to_pem
+            @csr.save
             redirect '/admin/csr'
           end
           
           delete '/admin/csr/:id' do
             @csr = RubyCA::Core::Models::CSR.get(params[:id])
-            File.delete $root_dir + "/keys/#{@csr.id}-#{@csr.cn}.pem" if File.exist? $root_dir + "/keys/#{@csr.id}-#{@csr.cn}.pem"
-            File.delete $root_dir + "/csrs/#{@csr.id}-#{@csr.cn}.pem" if File.exist? $root_dir + "/csrs/#{@csr.id}-#{@csr.cn}.pem"
             @csr.destroy
             redirect '/admin/csr'
           end
@@ -57,9 +52,10 @@ module RubyCA
         
           post '/admin/csr/:id/sign' do
             @csr = RubyCA::Core::Models::CSR.get(params[:id])
-            crt_key = OpenSSL::PKey::RSA.new File.read($root_dir + "/keys/#{@csr.id}-#{@csr.cn}.pem"), params[:passphrase][:certificate]
+            @crt = RubyCA::Core::Models::Certificate.create( cn: @csr.cn, pkey: @csr.pkey )
+            crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
             intermediate_key = OpenSSL::PKey::RSA.new ENC_INT_KEY, params[:passphrase][:intermediate]
-            csr = OpenSSL::X509::Request.new File.read $root_dir + "/csrs/#{@csr.id}-#{@csr.cn}.pem"
+            csr = OpenSSL::X509::Request.new @csr.csr
             intermediate_crt = OpenSSL::X509::Certificate.new File.read $root_dir + "/core/web/public/#{CONFIG['ca']['intermediate']['name']}_Intermediate_CA.crt"
             crt = OpenSSL::X509::Certificate.new
             crt.serial = IO.binread($root_dir + '/core/ca/last_serial').to_i + 1
@@ -79,10 +75,15 @@ module RubyCA
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
             crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['host']}/ca.crl"
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
-            open $root_dir + "/certificates/#{@csr.id}-#{@csr.cn}.crt", 'w' do |io|
-              io.write crt.to_pem
-            end 
-            redirect '/admin/csr'
+            @crt.crt = crt.to_pem
+            @crt.save
+            @csr.destroy
+            redirect '/admin/certificates'
+          end
+          
+          get '/admin/certificates' do
+            @certificates = RubyCA::Core::Models::Certificate.all
+            haml :certificates
           end
 
       end

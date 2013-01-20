@@ -2,15 +2,11 @@ module RubyCA
   module Core
     module Models
     
-      class CSR
+      class Certificate
           include DataMapper::Resource
           property :id, Serial
           property :cn, String, required: true
-          property :o, String, required: true
-          property :l, String, required: true
-          property :st, String, required: true
-          property :c, String, required: true
-          property :csr, Text
+          property :crt, Text
           property :pkey, Text
       end
     
