@@ -17,3 +17,22 @@
             %a.btn.btn-danger{ :href => "/admin/certificates/#{crt.cn}/revoke" }
               %i.icon-white.icon-remove
               Revoke
+			  
+-if !@revokeds.empty?
+  %legend Revoked Certificates     			  
+  %table.table.table-striped.table-hover
+    %thead
+      %tr
+        %td Common Name
+        %td 
+    %tbody
+      - @revokeds.each do |crt|
+        %tr
+          %td 
+            = crt.cn
+          %td 
+            %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
+              %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+              %button.btn.btn-danger{ :type => 'submit' }
+                %i.icon-white.icon-remove
+                Delete

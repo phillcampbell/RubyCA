@@ -27,40 +27,6 @@ module RubyCA
             'serverAuth' => false,
             'emailProtection' => false
           }
-          <<-DOC
-          Key Usage
-          ----------
-          Key usage is a multi valued extension consisting of a list of names of the permitted key usages.
-          The supporte names are: 
-          digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign, cRLSign, encipherOnly and decipherOnly.
-
-          Examples:
-           keyUsage=digitalSignature, nonRepudiation
-           keyUsage=critical, keyCertSign
-            
-          Extended Key Usage
-          -------------------
-          This extensions consists of a list of usages indicating purposes for which the certificate public key can be used for,
-          These can either be object short names of the dotted numerical form of OIDs. 
-          While any OID can be used only certain values make sense. 
-          In particular the following PKIX, NS and MS values are meaningful:
-            
-           Value                  Meaning
-           -----                  -------
-           serverAuth             SSL/TLS Web Server Authentication.
-           clientAuth             SSL/TLS Web Client Authentication.
-           codeSigning            Code signing.
-           emailProtection        E-mail Protection (S/MIME).
-           timeStamping           Trusted Timestamping
-           msCodeInd              Microsoft Individual Code Signing (authenticode)
-           msCodeCom              Microsoft Commercial Code Signing (authenticode)
-           msCTLSign              Microsoft Trust List Signing
-           msSGC                  Microsoft Server Gated Crypto
-           msEFS                  Microsoft Encrypted File System
-           nsSGC                  Netscape Server Gated Crypto
-           
-          DOC
-          
           
           before '/admin*' do
             unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
@@ -181,6 +147,7 @@ module RubyCA
           
           get '/admin/certificates/?' do
             @certificates = RubyCA::Core::Models::Certificate.all
+            @revokeds = RubyCA::Core::Models::Revoked.all
             haml :certificates
           end
           
@@ -243,8 +210,17 @@ module RubyCA
             intermediate_key = nil
             @crl.crl = crl.to_pem
             @crl.save
+            @revokedcert = RubyCA::Core::Models::Revoked.create( cn: @crt.cn, pkey: @crt.pkey, crt: @crt.crt )
+            @revokedcert.save
             @crt.destroy
             flash.next[:success] = "Revoked certificate for '#{@crt.cn}'"
+            redirect '/admin/certificates'
+          end
+          
+          delete '/admin/revokeds/:id/?' do
+            @revokedcert = RubyCA::Core::Models::Revoked.get(params[:id])
+            @revokedcert.destroy
+            flash.next[:success] = "Removed revoked certificate for '#{@revokedcert.id}: #{@revokedcert.cn}'"
             redirect '/admin/certificates'
           end
 
