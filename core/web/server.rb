@@ -12,7 +12,56 @@ module RubyCA
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
           mime_type :pem, 'pem/pem'
-        
+          
+          keyusages = {
+            'digitalSignature' => true,
+            'dataEncipherment' => false,
+            'keyEncipherment' => false,
+            'keyAgreement' => false,
+            'dataEncipherment' => false,
+            'cRLSign' => false
+          }
+
+          extendedkeys = { 
+            'clientAuth' => false,
+            'serverAuth' => false,
+            'emailProtection' => false
+          }
+          <<-DOC
+          Key Usage
+          ----------
+          Key usage is a multi valued extension consisting of a list of names of the permitted key usages.
+          The supporte names are: 
+          digitalSignature, nonRepudiation, keyEncipherment, dataEncipherment, keyAgreement, keyCertSign, cRLSign, encipherOnly and decipherOnly.
+
+          Examples:
+           keyUsage=digitalSignature, nonRepudiation
+           keyUsage=critical, keyCertSign
+            
+          Extended Key Usage
+          -------------------
+          This extensions consists of a list of usages indicating purposes for which the certificate public key can be used for,
+          These can either be object short names of the dotted numerical form of OIDs. 
+          While any OID can be used only certain values make sense. 
+          In particular the following PKIX, NS and MS values are meaningful:
+            
+           Value                  Meaning
+           -----                  -------
+           serverAuth             SSL/TLS Web Server Authentication.
+           clientAuth             SSL/TLS Web Client Authentication.
+           codeSigning            Code signing.
+           emailProtection        E-mail Protection (S/MIME).
+           timeStamping           Trusted Timestamping
+           msCodeInd              Microsoft Individual Code Signing (authenticode)
+           msCodeCom              Microsoft Commercial Code Signing (authenticode)
+           msCTLSign              Microsoft Trust List Signing
+           msSGC                  Microsoft Server Gated Crypto
+           msEFS                  Microsoft Encrypted File System
+           nsSGC                  Netscape Server Gated Crypto
+           
+          DOC
+          
+          
           before '/admin*' do
             unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
               halt 401, '401 Unauthorised'
@@ -70,13 +119,13 @@ module RubyCA
             redirect '/admin/csrs'
           end
           
-          get '/admin/csrs/:cn/sign/?' do
+          get '/admin/csrs/:cn/sign/?' do            
             if RubyCA::Core::Models::Certificate.get(params[:cn])
               flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
               redirect '/admin/csrs'
             end
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
-            haml :sign
+            haml :sign, :locals => {:keyusages => keyusages, :extendedkeys => extendedkeys}
           end
         
           post '/admin/csrs/:cn/sign/?' do
@@ -115,8 +164,11 @@ module RubyCA
             crt_ef = OpenSSL::X509::ExtensionFactory.new
             crt_ef.subject_certificate = crt
             crt_ef.issuer_certificate = intermediate_crt
-            crt.add_extension crt_ef.create_extension 'keyUsage','digitalSignature', true
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
+            
+            crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(', ')}", true
+            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(', ')}" if !params[:extendedkey].nil?            
+                         
             crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
             @crt.crt = crt.to_pem

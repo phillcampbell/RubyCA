@@ -22,6 +22,20 @@
 
 %form#csr.form-horizontal{ action: "/admin/csrs/#{@csr.cn}/sign", method: 'post' }
   %fieldset
+    %legend Select key Usage
+    .control-group.span12
+      -locals[:keyusages].map do |usage,default|
+        .controls.span1
+          %label.checkbox{ for: "keyusage[#{usage}]" }
+            %input{:type=>"checkbox", :name=>"keyusage[#{usage}]", :value=>1, :checked=>default} #{usage} 
+        
+    %legend Select Extened key Usage
+    .control-group.span12
+      -locals[:extendedkeys].map do |ext,default|
+        .controls.span1
+          %label.checkbox{ for: 'extendedkey[#{ext}]' }		
+            %input{:type=>"checkbox", :name=>"extendedkey[#{ext}]", :value=>1, :checked=>default} #{ext}
+
     %legend Enter Passphrases to Sign CSR
     .control-group
       %label.control-label{ for: 'intermediate' } Intermediate CA Key
