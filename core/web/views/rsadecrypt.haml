@@ -1,0 +1,20 @@
+%legend Selected Certificate
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %td Common Name
+  %tbody
+    %tr
+      %td 
+        = @crt.cn
+
+%form#csr.form-horizontal{ action: "/admin/certificates/decrypted/#{@crt.cn}.pem", method: 'post' }
+  %fieldset
+    %legend Enter Passphrase
+    .control-group
+      %label.control-label{ for: 'certificate' } Certificate Key
+      .controls
+        %input#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
+    .control-group
+      .controls
+        %button.btn.btn-primary{ type: 'submit' } Get Key

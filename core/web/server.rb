@@ -11,7 +11,6 @@ module RubyCA
           set :bind, CONFIG['web']['interface']
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
-          mime_type :pem, 'pem/pem'
           
           keyusages = {
             'digitalSignature' => true,
@@ -132,8 +131,8 @@ module RubyCA
             crt_ef.issuer_certificate = intermediate_crt
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
             
-            crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(', ')}", true
-            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(', ')}" if !params[:extendedkey].nil?            
+            crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(',')}", true
+            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" if !params[:extendedkey].nil?            
                          
             crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
@@ -173,6 +172,70 @@ module RubyCA
             @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
             content_type :pem
             @crt.pkey
+          end
+          
+          get '/admin/certificates/decrypted/:cn.pem' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Root or intermediate decrypted private key are disabled"
+              redirect '/admin/certificates'
+            else
+              haml :rsadecrypt
+            end
+          end
+          
+          post '/admin/certificates/decrypted/:cn.pem' do   
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Root or intermediate decrypted private key are disabled"
+              redirect '/admin/certificates'
+            else
+              deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
+              content_type :pem
+              deckey.to_pem
+            end
+          end
+
+          get '/admin/certificates/:cn.p12' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Root or intermediate pkcs12 certificates are disabled"
+              redirect '/admin/certificates'
+            else
+              haml :pkcs12
+            end
+          end
+          
+          post '/admin/certificates/:cn.p12' do
+            @crt = RubyCA::Core::Models::Certificate.get(params[:cn])
+            rawCA = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['root']['cn']).crt
+            rawintCA = RubyCA::Core::Models::Certificate.get(CONFIG['ca']['intermediate']['cn']).crt
+            root_ca = OpenSSL::X509::Certificate.new rawCA
+            root_int_ca = OpenSSL::X509::Certificate.new rawintCA
+            
+            if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+              flash.next[:error] = "Root or intermediate pkcs12 certificates are disabled"
+              redirect '/admin/certificates'
+            else
+              raw = @crt.crt
+              cert = OpenSSL::X509::Certificate.new raw
+              begin
+                deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
+              rescue OpenSSL::PKey::RSAError
+                flash.next[:error] = "Incorrect certificate passphrase"
+                redirect "/admin/certificates/#{params[:cn]}.p12"
+              end
+              
+              begin
+                p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
+                content_type :p12
+                p12.to_der
+              rescue OpenSSL::PKCS12::PKCS12Error
+                flash.next[:error] = "Error in pkcs12 generate"
+                redirect "/admin/certificates/#{params[:cn]}.p12"
+              end
+              #redirect "/admin/certificates"
+            end
           end
           
           get '/admin/certificates/:cn/revoke/?' do
@@ -223,7 +286,6 @@ module RubyCA
             flash.next[:success] = "Removed revoked certificate for '#{@revokedcert.id}: #{@revokedcert.cn}'"
             redirect '/admin/certificates'
           end
-
       end
     end
   end
