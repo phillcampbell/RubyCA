@@ -4,7 +4,7 @@
     %thead
       %tr
         %td Common Name
-        %td Organisation
+        %td Organization
         %td Locality
         %td State
         %td Country Code
@@ -38,23 +38,23 @@
     .control-group
       %label.control-label{ for: 'cn' } Common Name
       .controls
-        %input#cn{ name: 'csr[cn]', type: 'text', placeholder: 'e.g. www.acme.com' }
+        %input#cn{ name: 'csr[cn]', type: 'text', placeholder: 'e.g. www.acme.com', value: @csr.nil? ? '' : @csr[:cn] }
     .control-group
       %label.control-label{ for: 'o' } Organisation
       .controls
-        %input#o{ name: 'csr[o]', type: 'text', placeholder: 'e.g. ACME Ltd' }
+        %input#o{ name: 'csr[o]', type: 'text', placeholder: 'e.g. ACME Ltd', value: @csr.nil? ? '' : @csr[:o] }
     .control-group
       %label.control-label{ for: 'l' } Locality
       .controls
-        %input#l{ name: 'csr[l]', type: 'text', placeholder: 'e.g. Birmingham' }
+        %input#l{ name: 'csr[l]', type: 'text', placeholder: 'e.g. Birmingham', value: @csr.nil? ? '' : @csr[:l] }
     .control-group
       %label.control-label{ for: 'st' } State
       .controls
-        %input#st{ name: 'csr[st]', type: 'text', placeholder: 'e.g. West Midlands' }
+        %input#st{ name: 'csr[st]', type: 'text', placeholder: 'e.g. West Midlands', value: @csr.nil? ? '' : @csr[:st] }
     .control-group
       %label.control-label{ for: 'c' } Country Code
       .controls
-        %input#c{ name: 'csr[c]', type: 'text', placeholder: 'e.g. GB' }
+        %input#c{ name: 'csr[c]', type: 'text', placeholder: 'e.g. GB', value: @csr.nil? ? '' : @csr[:c] }
     .control-group
       %label.control-label{ for: 'passphrase' } Key Passphrase
       .controls

@@ -22,29 +22,55 @@
 
 %form#csr.form-horizontal{ action: "/admin/csrs/#{@csr.cn}/sign", method: 'post' }
   %fieldset
-    %legend Select key Usage
-    .control-group.span10
-      -locals[:keyusages].map do |usage,default|
-        .controls.span5
-          %label.checkbox{ for: "keyusage[#{usage}]" }
-            %input{:type=>"checkbox", :name=>"keyusage[#{usage}]", :value=>1, :checked=>default} #{usage} 
+  %div.row    
+    %div.span6
+      %legend Subject Alternative Name (optional)
+      .control-group
+        %label.control-label{ for: 'DNS' } DNS
+        .controls
+          %input#cn{ name: 'subjectAltName[DNS]', type: 'text', placeholder: 'e.g. www.acme.com' }
+      .control-group
+        %label.control-label{ for: 'IP' } IP
+        .controls
+          %input#cn{ name: 'subjectAltName[IP]', type: 'text', placeholder: 'e.g. 10.2.3.5' }
+      .control-group
+        %label.control-label{ for: 'URI' } URI
+        .controls
+          %input#cn{ name: 'subjectAltName[URI]', type: 'text', placeholder: 'e.g. http://www.acme.com' }
+      .control-group
+        %label.control-label{ for: 'email' } email
+        .controls
+          %input#cn{ name: 'subjectAltName[email]', type: 'text', placeholder: 'e.g. email@acme.com' }
+      .control-group
+        %label.control-label{ for: 'RID' } RID
+        .controls
+          %input#cn{ name: 'subjectAltName[RID]', type: 'text', placeholder: 'e.g. 1.2.3.4' }
+  
+    %div.span4
+      %div.row
+        %legend Key Usage (optional)
+        .control-group
+          -locals[:keyusages].map do |usage,default|
+            %label.checkbox{ for: "keyusage[#{usage}]" }
+              %input{:type=>"checkbox", :name=>"keyusage[#{usage}]", :value=>1, :checked=>default} #{usage} 
         
-    %legend Select Extened key Usage
-    .control-group.span10
-      -locals[:extendedkeys].map do |ext,default|
-        .controls.span5
-          %label.checkbox{ for: 'extendedkey[#{ext}]' }		
-            %input{:type=>"checkbox", :name=>"extendedkey[#{ext}]", :value=>1, :checked=>default} #{ext}
+      %div.row
+        %legend Extended Key Usage (optional)
+        .control-group
+          -locals[:extendedkeys].map do |ext,default|
+            %label.checkbox{ for: 'extendedkey[#{ext}]' }		
+              %input{:type=>"checkbox", :name=>"extendedkey[#{ext}]", :value=>1, :checked=>default} #{ext}
 
-    %legend Enter Passphrases to Sign CSR
-    .control-group
-      %label.control-label{ for: 'intermediate' } Intermediate CA Key
-      .controls
-        %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
-    .control-group
-      %label.control-label{ for: 'certificate' } Certificate Key
-      .controls
-        %input#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
-    .control-group
-      .controls
-        %button.btn.btn-primary{ type: 'submit' } Create Certificate
+          
+  %legend Enter Passphrases to Sign CSR
+  .control-group
+    %label.control-label{ for: 'intermediate' } Intermediate CA Key
+    .controls
+      %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
+  .control-group
+    %label.control-label{ for: 'certificate' } Certificate Key
+    .controls
+      %input#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
+  .control-group
+    .controls
+      %button.btn.btn-primary{ type: 'submit' } Create Certificate

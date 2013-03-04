@@ -6,11 +6,13 @@ module RubyCA
 
         class Server < Sinatra::Base
           use Rack::MethodOverride
-          enable :sessions
+          use Rack::Session::Pool
+          #enable :sessions
           register Sinatra::Flash
           set :bind, CONFIG['web']['interface']
           set :port, CONFIG['web']['port']
           set :haml, layout: :layout
+          mime_type :pem, 'pem/pem'
           
           keyusages = {
             'digitalSignature' => true,
@@ -20,7 +22,6 @@ module RubyCA
             'dataEncipherment' => false,
             'cRLSign' => false
           }
-
           extendedkeys = { 
             'clientAuth' => false,
             'serverAuth' => false,
@@ -49,20 +50,32 @@ module RubyCA
         
           get '/admin/csrs/?' do
             @csrs = RubyCA::Core::Models::CSR.all
+            @csr = session[:csr]
             haml :csrs
           end
           
-          post '/admin/csrs/?' do
+          post '/admin/csrs/?' do            
+            params[:csr].each do |k,v|
+              if v.nil? || v.empty?
+                session[:csr] = params[:csr]
+                flash.next[:error] = "All fields are required"
+                redirect '/admin/csrs'
+              end  
+            end
+            session[:csr] = nil
+
             if RubyCA::Core::Models::CSR.get(params[:csr][:cn])
               flash.next[:error] = "A certificate signing request already exists for '#{params[:csr][:cn]}'"
               redirect '/admin/csrs'
             end
+            
             @csr = RubyCA::Core::Models::CSR.create(
                 cn: params[:csr][:cn],
                 o: params[:csr][:o],
                 l: params[:csr][:l],
                 st: params[:csr][:st],
                 c: params[:csr][:c] )
+                
             cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
             key = OpenSSL::PKey::RSA.new 2048
             @csr.pkey = key.export(cipher, params[:csr][:passphrase])
@@ -92,7 +105,7 @@ module RubyCA
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             haml :sign, :locals => {:keyusages => keyusages, :extendedkeys => extendedkeys}
           end
-        
+          
           post '/admin/csrs/:cn/sign/?' do
             if RubyCA::Core::Models::Certificate.get(params[:cn])
               flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
@@ -130,10 +143,10 @@ module RubyCA
             crt_ef.subject_certificate = crt
             crt_ef.issuer_certificate = intermediate_crt
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
-            
+            altnames = params[:subjectAltName].reject{|k,v| v.empty?}
+            crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" if !altnames.empty? 
             crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(',')}", true
-            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" if !params[:extendedkey].nil?            
-                         
+            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" if !params[:extendedkey].nil?                         
             crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
             @crt.crt = crt.to_pem
@@ -190,9 +203,14 @@ module RubyCA
               flash.next[:error] = "Root or intermediate decrypted private key are disabled"
               redirect '/admin/certificates'
             else
-              deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
-              content_type :pem
-              deckey.to_pem
+              begin
+                deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
+                content_type :pem
+                deckey.to_pem
+              rescue OpenSSL::PKey::RSAError
+                flash.next[:error] = "Incorrect certificate passphrase"
+                redirect "/admin/certificates/#{params[:cn]}.p12"
+              end
             end
           end
 

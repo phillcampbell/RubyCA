@@ -14,8 +14,8 @@
           %a.btn{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
           %a.btn{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
           - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
-            %a.btn{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Decrypted Private Key
-            %a.btn{ href: "/admin/certificates/#{crt.cn}.p12" } PKCS12		  
+            %a.btn{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Decrypted Pkey
+            %a.btn{ href: "/admin/certificates/#{crt.cn}.p12" } pkcs12		  
             %a.btn.btn-danger{ :href => "/admin/certificates/#{crt.cn}/revoke" }
               %i.icon-white.icon-remove
               Revoke
