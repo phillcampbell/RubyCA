@@ -12,7 +12,7 @@ privileges:
   
 certificate:
   years: 1 # Number of years certificates will be valid
-  
+
 # Configuration relating to certificate authority
 ca:
   root:
@@ -29,3 +29,6 @@ ca:
     organisation: "My Intermediate CA"
     cn: "My Intermediate Certificate Authority"
     years: 20
+
+altcrl:
+   uri: '' # Alternative uri to crl e.g. http://www.example.com/ca/ca.crl

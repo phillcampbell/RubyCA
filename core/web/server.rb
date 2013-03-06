@@ -104,9 +104,9 @@ module RubyCA
             end
             @csr = RubyCA::Core::Models::CSR.get(params[:cn])
             haml :sign, :locals => {:keyusages => keyusages, :extendedkeys => extendedkeys}
-          end
-          
-          post '/admin/csrs/:cn/sign/?' do
+          end          
+                              
+          post '/admin/csrs/:cn/saign/?' do
             if RubyCA::Core::Models::Certificate.get(params[:cn])
               flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
               redirect '/admin/csrs'
@@ -144,10 +144,16 @@ module RubyCA
             crt_ef.issuer_certificate = intermediate_crt
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
             altnames = params[:subjectAltName].reject{|k,v| v.empty?}
-            crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" if !altnames.empty? 
+            crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" unless altnames.empty? 
             crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(',')}", true
-            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" if !params[:extendedkey].nil?                         
-            crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
+            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" unless params[:extendedkey].nil?
+            
+            crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
+            unless CONFIG['altcrl'].nil? || CONFIG['altcrl']['uri'].nil? || CONFIG['altcrl']['uri'] ===''
+              crldist = "#{crldist},URI:#{CONFIG['altcrl']['uri']}"
+            end
+            crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "#{crldist}"
+            
             crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
             @crt.crt = crt.to_pem
             @crt.save
