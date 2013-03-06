@@ -106,7 +106,7 @@ module RubyCA
             haml :sign, :locals => {:keyusages => keyusages, :extendedkeys => extendedkeys}
           end          
                               
-          post '/admin/csrs/:cn/saign/?' do
+          post '/admin/csrs/:cn/sign/?' do
             if RubyCA::Core::Models::Certificate.get(params[:cn])
               flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
               redirect '/admin/csrs'
