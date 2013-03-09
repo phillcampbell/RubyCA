@@ -10,13 +10,13 @@
         %td 
           = crt.cn
         %td 
-          %a.btn.btn-primary{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
-          %a.btn{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
-          %a.btn{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
+          %a.btn.btn-primary.btn-small{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
+          %a.btn.btn-small{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
+          %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
           - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
-            %a.btn{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Decrypted Pkey
-            %a.btn{ href: "/admin/certificates/#{crt.cn}.p12" } pkcs12		  
-            %a.btn.btn-danger{ :href => "/admin/certificates/#{crt.cn}/revoke" }
+            %a.btn.btn-small{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Decr. Priv. Key
+            %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}.p12" } pkcs#12		  
+            %a.btn.btn-danger.btn-small{ :href => "/admin/certificates/#{crt.cn}/revoke" }
               %i.icon-white.icon-remove
               Revoke
 			  
@@ -35,6 +35,6 @@
           %td 
             %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
               %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-              %button.btn.btn-danger{ :type => 'submit' }
+              %button.btn.btn-danger.btn-small{ :type => 'submit' }
                 %i.icon-white.icon-remove
                 Delete

@@ -24,11 +24,11 @@
             = csr.c
           %td 
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
-              %a.btn.btn-primary{ href: "/admin/csrs/#{csr.cn}/sign" }
+              %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
                 %i.icon-white.icon-lock
                 Sign
               %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-              %button.btn.btn-danger{ :type => 'submit' }
+              %button.btn.btn-danger.btn-small{ :type => 'submit' }
                 %i.icon-white.icon-remove
                 Delete
 
