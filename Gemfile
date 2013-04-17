@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'rack', '~> 1.4.5'
+#gem 'rack', '~> 1.4.5'
 gem 'sinatra'
 gem 'sinatra-flash'
 gem 'haml'
