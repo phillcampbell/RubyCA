@@ -9,13 +9,28 @@
       %tr
         %td 
           = crt.cn
-        %td 
-          %a.btn.btn-primary.btn-small{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
-          %a.btn.btn-small{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
-          %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
+        %td
+          .btn-group 
+            %a.btn.btn-small.btn-primary.dropdown-toggle{ :href => "#", "data-toggle" => "dropdown" } 
+              Download
+              %span.caret
+            %ul.dropdown-menu
+              %li
+                %a{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
+                
+              - unless crt.cn === CONFIG['ca']['root']['cn']               
+                %li
+                  %a{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
+                %li
+                  %a{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
+              
+              - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
+                %li
+                  %a{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key
+                %li
+                  %a{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled pkcs#12
+                  
           - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
-            %a.btn.btn-small{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Decr. Priv. Key
-            %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}.p12" } pkcs#12		  
             %a.btn.btn-danger.btn-small{ :href => "/admin/certificates/#{crt.cn}/revoke" }
               %i.icon-white.icon-remove
               Revoke
