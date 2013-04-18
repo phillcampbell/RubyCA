@@ -31,4 +31,8 @@ ca:
     years: 20
 
 altcrl:
-   uri: '' # Alternative uri to crl e.g. http://www.example.com/ca/ca.crl
+   uri: '' # Alternative uri to crl e.g. http://www.example.com/ca/ca.crl    organisation: "My Test Intermediate CA"
+
+auth:
+  username: 'adminca'
+  password: 'rubyca'

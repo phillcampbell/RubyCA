@@ -38,7 +38,7 @@ module RubyCA
 
             def authorized?
               @auth ||=  Rack::Auth::Basic::Request.new(request.env)
-              @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [CONFIG['acl']['username'], CONFIG['acl']['password']]
+              @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [CONFIG['auth']['username'], CONFIG['auth']['password']]
             end
           end
                     
