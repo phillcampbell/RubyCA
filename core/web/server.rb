@@ -28,9 +28,23 @@ module RubyCA
             'emailProtection' => false
           }
           
+          helpers do
+            def protected!
+              unless authorized?
+                response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
+                throw(:halt, [401, "Not authorized\n"])
+              end
+            end
+
+            def authorized?
+              @auth ||=  Rack::Auth::Basic::Request.new(request.env)
+              @auth.provided? && @auth.basic? && @auth.credentials && @auth.credentials == [CONFIG['acl']['username'], CONFIG['acl']['password']]
+            end
+          end
+                    
           before '/admin*' do
             unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
-              halt 401, '401 Unauthorised'
+              protected!
             end
           end
           
