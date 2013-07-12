@@ -9,4 +9,8 @@ log/*
 
 config.yaml
 thin.yaml
+<<<<<<< HEAD
 unicorn.conf
+=======
+unicorn.conf
+>>>>>>> 195202e021ae708691e36fdc849d50a0d7ea0b52
