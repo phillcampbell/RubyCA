@@ -43,7 +43,8 @@ module RubyCA
           end
                     
           before '/admin*' do
-            unless CONFIG['web']['admin']['allowed_ips'].include? request.ip
+            remote_ip = request.env['HTTP_X_REAL_IP'] || request.ip
+	          unless CONFIG['web']['admin']['allowed_ips'].include? remote_ip
               protected!
             end
           end
@@ -60,6 +61,18 @@ module RubyCA
           
           get '/admin/?' do
             haml :admin
+          end
+          
+          get '/admin/dh.pem' do
+            dh = OpenSSL::PKey::DH.new(2048)
+            content_type :pem
+            dh.public_key.to_pem #you may send this publicly to the participating party
+            
+            #dh2 = OpenSSL::PKey::DH.new(der)
+            #dh2.generate_key! #generate the per-session key pair
+            #symm_key1 = dh1.compute_key(dh2.pub_key)
+            #symm_key2 = dh2.compute_key(dh1.pub_key)
+            #puts symm_key1 == symm_key2 # => true
           end
         
           get '/admin/csrs/?' do
