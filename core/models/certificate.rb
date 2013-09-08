@@ -6,7 +6,7 @@ module RubyCA
     
       class Certificate
           include DataMapper::Resource
-          property :cn, String, unique: true, key: true
+          property :cn, String, :length => 64, unique: true, key: true
           property :crt, Text
           property :pkey, Text
       end
