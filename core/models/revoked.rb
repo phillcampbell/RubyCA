@@ -7,7 +7,7 @@ module RubyCA
       class Revoked
           include DataMapper::Resource
           property :id, Serial
-          property :cn, String
+          property :cn, String, :length => 64
           property :crt, Text
           property :pkey, Text
       end

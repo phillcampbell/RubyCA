@@ -25,7 +25,11 @@ module RubyCA
           extendedkeys = { 
             'clientAuth' => false,
             'serverAuth' => false,
-            'emailProtection' => false
+            'emailProtection' => false,
+            'ipsecEndSystem' => false,
+            'ipsecTunnel' => false,
+            'ipsecUser' => false,
+            '1.3.6.1.5.5.8.2.2' => false, #iKEIntermediate
           }
           
           helpers do
