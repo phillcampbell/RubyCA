@@ -15,6 +15,7 @@ module RubyCA
           mime_type :pem, 'pem/pem'
           
           keyusages = {
+            'nonRepudiation' => false,
             'digitalSignature' => true,
             'dataEncipherment' => false,
             'keyEncipherment' => false,
@@ -29,7 +30,7 @@ module RubyCA
             'ipsecEndSystem' => false,
             'ipsecTunnel' => false,
             'ipsecUser' => false,
-            '1.3.6.1.5.5.8.2.2' => false, #iKEIntermediate
+            '1.3.6.1.5.5.8.2.2' => false #iKEIntermediate
           }
           
           helpers do
