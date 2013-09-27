@@ -2,6 +2,11 @@ body {
   padding-top: 60px; /* 60px to make the container go all the way to the bottom of the topbar */
 }
 
+
+pre {
+  font-size: 70%;
+}
+
 [class^="icon-"],
 [class*=" icon-"] {
   background-image: url("/glyphicons-halflings.png");
@@ -21,4 +26,11 @@ body {
 .dropdown-submenu:hover > a > [class^="icon-"],
 .dropdown-submenu:hover > a > [class*=" icon-"] {
   background-image: url("/glyphicons-halflings-white.png");
+}
+
+#myModal {
+  width: 75%;
+  left: 12%;
+  margin-left:auto;
+  margin-right:auto; 
 }
