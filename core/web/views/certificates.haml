@@ -10,7 +10,8 @@
         %td 
           = crt.cn
         %td
-          .btn-group 
+          %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}/info", "data-toggle"=>"modal"} Info
+          .btn-group                           
             %a.btn.btn-small.btn-primary.dropdown-toggle{ :href => "#", "data-toggle" => "dropdown" } 
               Download
               %span.caret
@@ -53,3 +54,11 @@
               %button.btn.btn-danger.btn-small{ :type => 'submit' }
                 %i.icon-white.icon-remove
                 Delete
+              
+#myModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "Certificate Text", role: "dialog", tabindex: "-1"}
+  .modal-header
+    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
+    %h3 Certificate Text
+  .modal-body
+  .modal-footer
+    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close

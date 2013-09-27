@@ -207,6 +207,14 @@ module RubyCA
             @crt.crt
           end
           
+          get '/admin/certificates/:cn/info/?' do
+            raw = RubyCA::Core::Models::Certificate.get(params[:cn])
+            crt = OpenSSL::X509::Certificate.new  raw.crt
+            content_type :txt
+            crt.to_text 
+            
+          end
+          
           get '/admin/certificates/chain/:cn.crt' do
             output = RubyCA::Core::Models::Certificate.get(params[:cn]).crt
             unless params[:cn] === CONFIG['ca']['root']['cn'] or params[:cn] === CONFIG['ca']['intermediate']['cn']
