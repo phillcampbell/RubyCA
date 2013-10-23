@@ -40,7 +40,7 @@ Visit http:// *host* : *port* /admin to manage certificates
 
 ## Tips
 
-RubyCA will be able to be ran as a daemon now
+RubyCA will be able to be run as daemon now
 Create the thin.yaml file and edit to suit your requirements
 
     $ cp ./thin.yaml.sample ./thin.yaml
@@ -53,4 +53,5 @@ RubyCA must be started with
 ## Note
 
 The first run still needs RubyCA run as root to be able to generate the ca certificates.
+    
     $ sudo ./RubyCA
