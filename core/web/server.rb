@@ -171,18 +171,21 @@ module RubyCA
             crt.subject = csr.subject
             crt.public_key = csr.public_key
             crt.issuer = intermediate_crt.subject
+            
             crt_ef = OpenSSL::X509::ExtensionFactory.new
             crt_ef.subject_certificate = crt
             crt_ef.issuer_certificate = intermediate_crt
+            crt.add_extension crt_ef.create_extension 'basicConstraints', 'CA:FALSE'
+            crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(',')}", true
+            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" unless params[:extendedkey].nil?
             crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
             altnames = params[:subjectAltName].reject{|k,v| v.empty?}
             crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" unless altnames.empty? 
-            crt.add_extension crt_ef.create_extension 'keyUsage',params[:keyusage].nil? ? "digitalSignature" : "#{params[:keyusage].map{|ku,v| "#{ku}"}.join(',')}", true
-            crt.add_extension crt_ef.create_extension 'extendedKeyUsage',"#{params[:extendedkey].map{|ek,v| "#{ek}"}.join(',')}" unless params[:extendedkey].nil?
             
-            crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
-            unless CONFIG['altcrl'].nil? || CONFIG['altcrl']['uri'].nil? || CONFIG['altcrl']['uri'] ===''
-              crldist = "#{crldist},URI:#{CONFIG['altcrl']['uri']}"
+            if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+              crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
+            else
+              crldist = "URI:#{CONFIG['crlDist']['uri']}"
             end
             crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "#{crldist}"
             

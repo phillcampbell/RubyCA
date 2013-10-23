@@ -32,7 +32,7 @@ Create the config.yaml file and edit to suit your requirements
     $ cp ./config.yaml.sample ./config.yaml
     $ nano ./config.yaml
 
-RubyCA must be started as root on the first run to be able to generate the ca certificates
+RubyCA must be started as root on the first run to be able generate the ca certificates
 
     $ sudo ./RubyCA
     
@@ -40,10 +40,19 @@ Visit http:// *host* : *port* /admin to manage certificates
 
 ## Tips
 
-RubyCA will be able to be ran as a daemon if the future, but for now you can use 'screen' to run it in the background.
+RubyCA will be able to be run as daemon now
 
-    $ screen -S 'RubyCA' -d -m ./RubyCA
+Create the thin.yaml file and edit to suit your requirements
+
+    $ cp ./thin.yaml.sample ./thin.yaml
+    $ nano ./thin.yaml
     
-You can then access the running screen session with:
+RubyCA must be started with
+
+    $ bundle exec thin start -C ./thin.yaml
+
+Note:
+
+The first run still needs RubyCA run as root to be able generate the ca certificates.
     
-    $ screen -r 'RubyCA'
+    $ sudo ./RubyCA
