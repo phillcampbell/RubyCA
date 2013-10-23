@@ -50,14 +50,21 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   root_crt.add_extension root_ef.create_extension 'subjectKeyIdentifier', 'hash'
   root_crt.add_extension root_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
+  # CRL distribuition URI. 
+  # if URI is blank or null use auto generation URI based on config.
+  if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+    crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
+  else
+    crldist = "URI:#{CONFIG['crlDist']['uri']}"
+  end
+  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "#{crldist}"
+  
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @root_crt = RubyCA::Core::Models::Certificate.create( cn: "#{CONFIG['ca']['root']['cn']}" )
   @root_crt.crt = root_crt.to_pem
   @root_crt.save
-  # Generate intermediate certificate
   
-  # Generate intermediate key
+  # Generate intermediate certificate and key
   intermediate_key = OpenSSL::PKey::RSA.new 2048
   puts ''
   puts 'You will now be asked to enter a pass phrase for the intermediate CA key. This is not stored by RubyCA.'
@@ -87,7 +94,15 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   intermediate_crt.add_extension intermediate_ef.create_extension 'subjectKeyIdentifier', 'hash'
   intermediate_crt.add_extension intermediate_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"
+  # CRL distribuition URI. 
+  # if URI is blank or null use auto generation URI based on config.
+  if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+    crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
+  else
+    crldist = "URI:#{CONFIG['crlDist']['uri']}"
+  end
+  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "#{crldist}"
+  
   intermediate_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @intermediate_crt.crt = intermediate_crt.to_pem
   @intermediate_crt.save

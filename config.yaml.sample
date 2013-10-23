@@ -30,8 +30,11 @@ ca:
     cn: "My Intermediate Certificate Authority"
     years: 20
 
-altcrl:
-   uri: '' # Alternative uri to crl e.g. http://www.example.com/ca/ca.crl    organisation: "My Test Intermediate CA"
+# CRL distribuition
+# if uri: is blank or null, URI is auto generated using top "web:" configurations.
+# last generated crl URI is http:// *host* : *port* /ca.crl
+crlDist:
+   uri: '' # e.g. http://www.example.com/ca.crl 
 
 auth:
   username: 'adminca'
