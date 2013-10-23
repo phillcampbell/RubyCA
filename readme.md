@@ -32,7 +32,7 @@ Create the config.yaml file and edit to suit your requirements
     $ cp ./config.yaml.sample ./config.yaml
     $ nano ./config.yaml
 
-RubyCA must be started as root on the first run to be able to generate the ca certificates
+RubyCA must be started as root on the first run to be able generate the ca certificates
 
     $ sudo ./RubyCA
     
@@ -52,6 +52,6 @@ RubyCA must be started with
 
 ## Note
 
-The first run still needs RubyCA run as root to be able to generate the ca certificates.
+The first run still needs RubyCA run as root to be able generate the ca certificates.
     
     $ sudo ./RubyCA
