@@ -5,6 +5,9 @@ web:
   port: 80 # The port the web server will run on
   admin: 
     allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
+    auth:
+      enable: false # true require setup user and password on http://<server>:<port>/admin/setup. 
+                    # false permit only allowed_ips without  authentication pass.
 
 privileges:
   user: 'user' # The user to run as once privileges are dropped
@@ -35,7 +38,3 @@ ca:
 # last generated crl URI is http:// *host* : *port* /ca.crl
 crlDist:
    uri: '' # e.g. http://www.example.com/ca.crl 
-
-auth:
-  username: 'adminca'
-  password: 'rubyca'

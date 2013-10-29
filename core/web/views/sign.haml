@@ -2,11 +2,11 @@
 %table.table.table-striped.table-hover
   %thead
     %tr
-      %td Common Name
-      %td Organisation
-      %td Locality
-      %td State
-      %td Country Code
+      %th Common Name
+      %th Organisation
+      %th Locality
+      %th State
+      %th Country Code
   %tbody
     %tr
       %td 
@@ -28,38 +28,38 @@
       .control-group
         %label.control-label{ for: 'DNS' } DNS
         .controls
-          %input#cn{ name: 'subjectAltName[DNS]', type: 'text', placeholder: 'e.g. www.acme.com' }
+          %input#cn{ name: 'subjectAltName[DNS]', type: 'text', placeholder: 'e.g. www.acme.com', value: @san.nil? ? '' : @san[:DNS] }
       .control-group
         %label.control-label{ for: 'IP' } IP
         .controls
-          %input#cn{ name: 'subjectAltName[IP]', type: 'text', placeholder: 'e.g. 10.2.3.5' }
+          %input#cn{ name: 'subjectAltName[IP]', type: 'text', placeholder: 'e.g. 10.2.3.5', value: @san.nil? ? '' : @san[:IP] }
       .control-group
         %label.control-label{ for: 'URI' } URI
         .controls
-          %input#cn{ name: 'subjectAltName[URI]', type: 'text', placeholder: 'e.g. http://www.acme.com' }
+          %input#cn{ name: 'subjectAltName[URI]', type: 'text', placeholder: 'e.g. http://www.acme.com', value: @san.nil? ? '' : @san[:URI] }
       .control-group
         %label.control-label{ for: 'email' } email
         .controls
-          %input#cn{ name: 'subjectAltName[email]', type: 'text', placeholder: 'e.g. email@acme.com' }
+          %input#cn{ name: 'subjectAltName[email]', type: 'text', placeholder: 'e.g. email@acme.com',value: @san.nil? ? '' : @san[:email] }
       .control-group
         %label.control-label{ for: 'RID' } RID
         .controls
-          %input#cn{ name: 'subjectAltName[RID]', type: 'text', placeholder: 'e.g. 1.2.3.4' }
+          %input#cn{ name: 'subjectAltName[RID]', type: 'text', placeholder: 'e.g. 1.2.3.4',value: @san.nil? ? '' : @san[:RID] }
   
     %div.span4
       %div.row
         %legend Key Usage (optional)
         .control-group
           -locals[:keyusages].map do |usage,default|
-            %label.checkbox{ for: "keyusage[#{usage}]" }
-              %input{:type=>"checkbox", :name=>"keyusage[#{usage}]", :value=>1, :checked=>default} #{usage} 
+            %label.checkbox{ for: "keyusages[#{usage}]" }
+              %input{:type=>"checkbox", :name=>"keyusages[#{usage}]", :value=>1, :checked=>default} #{usage} 
         
       %div.row
         %legend Extended Key Usage (optional)
         .control-group
-          -locals[:extendedkeys].map do |ext,default|
-            %label.checkbox{ for: 'extendedkey[#{ext}]' }		
-              %input{:type=>"checkbox", :name=>"extendedkey[#{ext}]", :value=>1, :checked=>default} #{ext}
+          -locals[:extendedkeyusages].map do |ext,default|
+            %label.checkbox{ for: 'extendedkeyusages[#{ext}]' }		
+              %input{:type=>"checkbox", :name=>"extendedkeyusages[#{ext}]", :value=>1, :checked=>default} #{ext}
 
           
   %legend Enter Passphrases to Sign CSR
@@ -74,3 +74,5 @@
   .control-group
     .controls
       %button.btn.btn-primary{ type: 'submit' } Create Certificate
+      -if !@sign.nil?
+        %a.btn.btn{ href: "/admin/csrs/sign/cancel" } Cancel

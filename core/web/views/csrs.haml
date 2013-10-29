@@ -3,12 +3,12 @@
   %table.table.table-striped.table-hover
     %thead
       %tr
-        %td Common Name
-        %td Organization
-        %td Locality
-        %td State
-        %td Country Code
-        %td
+        %th Common Name
+        %th Organization
+        %th Locality
+        %th State
+        %th Country Code
+        %th
     %tbody
       - @csrs.each do |csr|
         %tr
@@ -24,6 +24,7 @@
             = csr.c
           %td 
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
+              %a.btn.btn-small{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal" } Info
               %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
                 %i.icon-white.icon-lock
                 Sign
@@ -62,3 +63,5 @@
     .control-group
       .controls
         %button.btn.btn-primary{ type: 'submit' } Submit
+        - if !@csr.nil?
+          %a.btn.btn{ href: "/admin/csrs/cancel" } Cancel

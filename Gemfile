@@ -1,10 +1,11 @@
 source 'https://rubygems.org'
 
 #gem 'rack', '~> 1.4.5'
-gem 'sinatra', '1.4.3'
+gem 'sinatra', '1.4.4'
 gem 'sinatra-flash'
 gem 'haml'
 gem 'dm-sqlite-adapter'
 gem 'dm-migrations'
 gem 'dm-validations'
-gem 'thin'
+gem 'ipaddress'
+gem 'thin', '1.6.0'

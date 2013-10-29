@@ -1,0 +1,23 @@
+%legend Selected Certificate
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %th Issuer Common Name
+      %th Expired On
+  %tbody
+    %tr
+      %td 
+        = @crl_info[:issuer]["CN"]
+      %td
+        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S UTC")  
+
+%form#csr.form-horizontal{ action: "/admin/crl/renew", method: 'post' }
+  %fieldset
+    %legend Enter Passphrase
+    .control-group
+      %label.control-label{ for: 'intermediate' } Intermediate CA Key
+      .controls
+        %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
+    .control-group
+      .controls
+        %button.btn.btn-primary{ type: 'submit' } Renew CRL        
