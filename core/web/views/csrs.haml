@@ -1,5 +1,6 @@
+%h2 Certificate Signing Requests
 - if @csrs.any?
-  %legend Certificate Signing Requests Awaiting Signature        
+  %legend Awaiting Signature        
   %table.table.table-striped.table-hover
     %thead
       %tr
@@ -24,7 +25,7 @@
             = csr.c
           %td 
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
-              %a.btn.btn-small{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal" } Info
+              %a.btn.btn-small{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" } Info
               %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
                 %i.icon-white.icon-lock
                 Sign
@@ -35,7 +36,7 @@
 
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset
-    %legend Create Certificate Signing Request
+    %legend Create CSR
     .control-group
       %label.control-label{ for: 'cn' } Common Name
       .controls
@@ -62,6 +63,6 @@
         %input#passphrase{ name: 'csr[passphrase]', type: 'password', placeholder: '' }
     .control-group
       .controls
-        %button.btn.btn-primary{ type: 'submit' } Submit
+        %button.btn.btn-primary{ type: 'submit' } Create New
         - if !@csr.nil?
           %a.btn.btn{ href: "/admin/csrs/cancel" } Cancel

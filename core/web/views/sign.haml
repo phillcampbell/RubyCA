@@ -1,4 +1,5 @@
-%legend Selected Certificate Signing Request
+%h2 Signing CSR
+%legend Selected Certificate
 %table.table.table-striped.table-hover
   %thead
     %tr
@@ -68,11 +69,7 @@
     .controls
       %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
   .control-group
-    %label.control-label{ for: 'certificate' } Certificate Key
     .controls
-      %input#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
-  .control-group
-    .controls
-      %button.btn.btn-primary{ type: 'submit' } Create Certificate
+      %button.btn.btn-primary{ type: 'submit' } Sign Certificate
       -if !@sign.nil?
         %a.btn.btn{ href: "/admin/csrs/sign/cancel" } Cancel

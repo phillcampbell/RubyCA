@@ -4,6 +4,10 @@ module RubyCA
   module Core
     module Web
       class Server < Sinatra::Base
+        configure :development do
+          register Sinatra::Reloader
+        end
+        
         use Rack::MethodOverride
         use Rack::Session::Pool
         register Sinatra::Flash
@@ -36,11 +40,11 @@ module RubyCA
           
           def hosts_allowed?
             allowed = false
-            rip_addr = request.env['HTTP_X_REAL_IP'] || request.ip
-            remote_ip = IPAddress::IPv4.new rip_addr
+            remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
+            remote_ip = IPAddress::IPv4.new remote_addr
             
-            CONFIG['web']['admin']['allowed_ips'].each do |allowed_addr|
-              allow = IPAddress::IPv4.new allowed_addr
+            CONFIG['web']['admin']['allowed_ips'].each do |allowed_ip|
+              allow = IPAddress::IPv4.new allowed_ip
               if allow.include? remote_ip
                 allowed = true
                 break
@@ -127,8 +131,8 @@ module RubyCA
           CONFIG['web']['admin']['auth']['password'] = Digest::MD5.hexdigest(password) unless password.nil? || password.empty?
           CONFIG['web']['admin']['auth']['enable'] = enable
           File.open($root_dir+'/config.yaml', 'w') {|f| YAML.dump(CONFIG, f) } #Store
-          flash.next[:success] = "Admin authentication setting stored"
-          redirect '/admin'
+          flash.next[:success] = "Admin authentication settings stored"
+          redirect '/admin/setup'
         end
                 
         get '/admin/crl' do
@@ -283,18 +287,10 @@ module RubyCA
         post '/admin/csrs/:cn/sign/?' do
           session.delete(:sign)
           if RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-            flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
+            flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before sign this request"
             redirect '/admin/csrs'
           end
           @csr = RubyCA::Core::Models::CSR.get(params[:cn])
-          begin
-            crt_key = OpenSSL::PKey::RSA.new @csr.pkey, params[:passphrase][:certificate]
-          rescue OpenSSL::PKey::RSAError
-            session[:sign] = params
-            flash.next[:error] = "Incorrect certificate passphrase"
-            redirect "/admin/csrs/#{params[:cn]}/sign"
-          end
-          
           @intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
           begin
             intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
