@@ -1,6 +1,5 @@
 source 'https://rubygems.org'
 
-gem 'rake', '>=0.9.6'
 gem 'sinatra', '1.4.4'
 gem 'sinatra-flash'
 gem 'haml'
@@ -14,3 +13,6 @@ group :development do
   gem 'sinatra-reloader'
 end
 
+group :test do
+  gem 'rake', '>=0.9.6'
+end
