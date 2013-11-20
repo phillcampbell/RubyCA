@@ -1,5 +1,6 @@
 source 'https://rubygems.org'
 
+gem 'rake', '>=0.9.6'
 gem 'sinatra', '1.4.4'
 gem 'sinatra-flash'
 gem 'haml'
