@@ -7,7 +7,7 @@ gem 'dm-sqlite-adapter'
 gem 'dm-migrations'
 gem 'dm-validations'
 gem 'ipaddress'
-gem 'thin', '1.6.0'
+gem 'thin', '1.6.1'
 
 group :development do
   gem 'sinatra-reloader'
