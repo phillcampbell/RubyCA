@@ -1,0 +1,21 @@
+%h2 CRL
+%table.table.table-striped.table-hover
+  %thead
+    %tr
+      %th Issuer Common Name
+      %th Last Update
+      %th Next Update
+      %th
+  %tbody
+    %tr
+      %td
+        = @crl_info[:issuer]["CN"]
+      %td
+        = @crl_info[:last_update].strftime("%d/%m/%Y %H:%M:%S UTC")
+      %td
+        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S UTC")  
+      %td
+        %a.btn.btn-small{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"} Info
+        %a.btn.btn-small.btn-primary{ :href => "/ca.crl"} Download 
+        - if @crl_info[:expired]
+          %a.btn.btn-small.btn-warning{ :href => "/admin/crl/renew"} Renew 

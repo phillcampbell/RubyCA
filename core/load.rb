@@ -12,6 +12,7 @@ Bundler.require(:default)
 
 # Requires
 require 'singleton'
+require "sinatra/reloader"
 
 # Test config.yml exists
 cfg_file = $root_dir + '/config.yaml'

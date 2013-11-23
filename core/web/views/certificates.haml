@@ -1,16 +1,16 @@
-%legend Certificates     
+%h2 Certificates     
 %table.table.table-striped.table-hover
   %thead
     %tr
-      %td Common Name
-      %td 
+      %th Common Name
+      %th 
   %tbody
     - @certificates.each do |crt|
       %tr
         %td 
           = crt.cn
         %td
-          %a.btn.btn-small{ href: "/admin/certificates/#{crt.cn}/info", "data-toggle"=>"modal"} Info
+          %a.info.btn.btn-small{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" } Info
           .btn-group                           
             %a.btn.btn-small.btn-primary.dropdown-toggle{ :href => "#", "data-toggle" => "dropdown" } 
               Download
@@ -29,7 +29,7 @@
                 %li
                   %a{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key
                 %li
-                  %a{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled pkcs#12
+                  %a{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12
                   
           - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
             %a.btn.btn-danger.btn-small{ :href => "/admin/certificates/#{crt.cn}/revoke" }
@@ -54,11 +54,3 @@
               %button.btn.btn-danger.btn-small{ :type => 'submit' }
                 %i.icon-white.icon-remove
                 Delete
-              
-#myModal.modal.hide.fade{"aria-hidden" => "true", "aria-labelledby" => "Certificate Text", role: "dialog", tabindex: "-1"}
-  .modal-header
-    %button.close{"aria-hidden" => "true", "data-dismiss" => "modal", type: "button"} ×
-    %h3 Certificate Text
-  .modal-body
-  .modal-footer
-    %button.btn{"aria-hidden" => "true", "data-dismiss" => "modal"} Close

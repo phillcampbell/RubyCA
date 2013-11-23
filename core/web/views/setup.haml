@@ -1,0 +1,17 @@
+%h2 Setup
+%legend Admin Authentication
+%form#csr.form-horizontal{ action: "/admin/setup", method: 'post' }
+  %fieldset    
+    .control-group
+      %label.control-label{ for: 'username' } Username
+      .controls
+        %input#username{ name: 'authcfg[username]', type: 'text', placeholder: @authcfg.nil? || @authcfg["username"].nil? ? 'prefer not admin, root etc' : 'Username already created' }
+    .control-group
+      %label.control-label{ for: 'authcfg[password]' } Password
+      .controls
+        %input#password{ name:'authcfg[password]', type:'password', placeholder:  @authcfg.nil? || @authcfg["password"].nil? ? '' : 'Password already created'}
+    .control-group
+      .controls
+        %label.checkbox{ for: "enable" }
+          %input#enable{ type: 'checkbox', name: 'authcfg[enable]', value: 1, checked: @authcfg.nil? ? false : @authcfg["enable"] } Enable authentication
+        %button.btn.btn-primary{ type: 'submit' } Save

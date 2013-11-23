@@ -14,7 +14,6 @@ module RubyCA
           property :csr, Text
           property :pkey, Text
       end
-    
     end
   end
 end

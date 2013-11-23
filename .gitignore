@@ -6,7 +6,7 @@ Gemfile.lock
 tmp/*
 log/*
 *.db
-*-bak.1
+*-bak.*
 
 config.yaml
 thin.yaml
