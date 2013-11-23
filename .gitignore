@@ -2,7 +2,6 @@
 *.pem
 *.crt
 core/ca/last_serial
-Gemfile.lock
 tmp/*
 log/*
 *.db
