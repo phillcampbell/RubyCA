@@ -15,7 +15,14 @@
       %td
         = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S UTC")  
       %td
-        %a.btn.btn-small{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"} Info
-        %a.btn.btn-small.btn-primary{ :href => "/ca.crl"} Download 
-        - if @crl_info[:expired]
-          %a.btn.btn-small.btn-warning{ :href => "/admin/crl/renew"} Renew 
+        .btn-group
+          %a.btn.btn-small.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
+            %i.icon-white.icon-info-sign
+            %span.visible-desktop Info
+          %a.btn.btn-small.btn-primary{ :href => "/ca.crl"}
+            %i.icon-white.icon-download
+            %span.visible-desktop Download 
+          - if @crl_info[:expired]
+            %a.btn.btn-small.btn-warning{ :href => "/admin/crl/renew"}
+              %i.icon-white.icon-refresh
+              %span.visible-desktop Renew

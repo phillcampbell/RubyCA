@@ -25,14 +25,17 @@
             = csr.c
           %td 
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
-              %a.btn.btn-small{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" } Info
-              %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
-                %i.icon-white.icon-lock
-                Sign
-              %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-              %button.btn.btn-danger.btn-small{ :type => 'submit' }
-                %i.icon-white.icon-remove
-                Delete
+              .btn-group
+                %a.btn.btn-small.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
+                  %i.icon-white.icon-info-sign
+                  %span.visible-desktop Info
+                %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
+                  %i.icon-white.icon-pencil
+                  %span.visible-desktop Sign
+                %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+                %button.btn.btn-danger.btn-small{ :type => 'submit' }
+                  %i.icon-white.icon-trash
+                  %span.visible-desktop Delete
 
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset

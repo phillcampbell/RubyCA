@@ -2,24 +2,30 @@
 %html{ lang: 'en' }
   %head
     %meta{ charset: 'utf-8' }
+    %meta{name: "viewport", content: "width=device-width", "initial-scale" => "1.0"}
     %title RubyCA
     %link{ href: '/bootstrap.min.css', rel: 'stylesheet' }
-    %link{ href: '/bootstrap-responsive.min.css', rel: 'stylesheet' }
     %link{ href: '/rubyca.css', rel: 'stylesheet' }
+    %link{ href: '/bootstrap-responsive.min.css', rel: 'stylesheet' }
   %body
     .navbar.navbar-fixed-top.navbar-inverse
       .navbar-inner
         .container
+          %a.btn.btn-navbar{ "data-toggle" => "collapse",  "data-target" => ".nav-collapse" }
+            %span.icon-bar
+            %span.icon-bar
+            %span.icon-bar
           %a.brand{ href: '/admin' } RubyCA
-          %ul.nav
-            %li
-              %a{ href: '/admin/certificates' } Certificates
-            %li
-              %a{ href: '/admin/csrs' } Signing Requests
-            %li
-              %a{ href: '/admin/crl' } CRL
-            %li
-              %a{ href: '/admin/setup' } Settings
+          .nav-collapse.collapse
+            %ul.nav
+              %li
+                %a{ href: '/admin/certificates' } Certificates
+              %li
+                %a{ href: '/admin/csrs' } Signing Requests
+              %li
+                %a{ href: '/admin/crl' } CRL
+              %li
+                %a{ href: '/admin/setup' } Settings
     .container
       =styled_flash
       = yield

@@ -41,13 +41,15 @@ module RubyCA
           def hosts_allowed?
             allowed = false
             remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
-            remote_ip = IPAddress::IPv4.new remote_addr
+            remote_ip = IPAddress remote_addr
             
             CONFIG['web']['admin']['allowed_ips'].each do |allowed_ip|
-              allow = IPAddress::IPv4.new allowed_ip
-              if allow.include? remote_ip
-                allowed = true
-                break
+              allow = IPAddress allowed_ip
+              if (remote_ip.ipv4? && allow.ipv4?) || (remote_ip.ipv6? && allow.ipv6?)
+                if allow.include? remote_ip
+                  allowed = true
+                  break
+                end
               end
             end
             allowed
@@ -411,7 +413,7 @@ module RubyCA
               deckey.to_pem
             rescue OpenSSL::PKey::RSAError
               flash.next[:error] = "Incorrect certificate passphrase"
-              redirect "/admin/certificates/#{params[:cn]}.p12"
+              redirect "/admin/certificates/decrypted/#{params[:cn]}.pem"
             end
           end
         end
@@ -510,7 +512,7 @@ module RubyCA
         not_found do
           '404 - Not Found'
         end
-        
+      	
         get '/admin/dh.pem' do
           # ATTENTION
           # Be carefull. This is a experimental issue.
