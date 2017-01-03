@@ -1,5 +1,3 @@
-.DS_Store
-._*
 *.pem
 *.crt
 core/ca/last_serial
@@ -7,6 +5,11 @@ tmp/*
 log/*
 *.db
 *-bak.*
-
+core/web/public/tmp
+private
 config.yaml
 thin.yaml
+
+.DS_Store
+._*
+.AppleDouble

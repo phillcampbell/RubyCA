@@ -1,28 +1,28 @@
 %h2 CRL
-%table.table.table-striped.table-hover
+%table.table.table-striped.table-hover.table-sm
   %thead
     %tr
       %th Issuer Common Name
-      %th Last Update
-      %th Next Update
+      %th Last Update (UTC)
+      %th Next Update (UTC)
       %th
   %tbody
     %tr
       %td
         = @crl_info[:issuer]["CN"]
       %td
-        = @crl_info[:last_update].strftime("%d/%m/%Y %H:%M:%S UTC")
+        = @crl_info[:last_update].strftime("%d/%m/%y %H:%M:%S")
       %td
-        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S UTC")  
-      %td
+        = @crl_info[:next_update].strftime("%d/%m/%y %H:%M:%S")  
+      %td.pull-right
         .btn-group
-          %a.btn.btn-small.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
-            %i.icon-white.icon-info-sign
-            %span.visible-desktop Info
-          %a.btn.btn-small.btn-primary{ :href => "/ca.crl"}
-            %i.icon-white.icon-download
-            %span.visible-desktop Download 
+          %a.btn.btn-sm.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
+            %i.fa.fa-info
+            %span.hidden-sm-down Info
+          %a.btn.btn-sm.btn-primary{ :href => "/ca.crl"}
+            %i.fa.fa-download
+            %span.hidden-sm-down Download 
           - if @crl_info[:expired]
-            %a.btn.btn-small.btn-warning{ :href => "/admin/crl/renew"}
-              %i.icon-white.icon-refresh
-              %span.visible-desktop Renew
+            %a.btn.btn-sm.btn-warning{ :href => "/admin/crl/renew"}
+              %i.fa.fa-refresh
+              %span.hidden-sm-down Renew

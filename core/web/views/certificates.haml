@@ -1,44 +1,39 @@
-%h2 Certificates     
-%table.table.table-striped.table-hover
+%h2 Certificates 
+%table.table.table-striped.table-hover.table-sm
   %thead
     %tr
       %th Common Name
-      %th 
+      %th
   %tbody
     - @certificates.each do |crt|
       %tr
-        %td 
-          = crt.cn
         %td
+          = crt.cn
+        %td.pull-right
           .btn-group
-            %a.btn.btn-small.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" }
-              %i.icon-white.icon-info-sign
-              %span.visible-desktop Info
+            %a.btn.btn-sm.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" }
+              %i.fa.fa-info
+              %span.hidden-sm-down Info
             .btn-group                           
-              %a.btn.btn-small.btn-primary.dropdown-toggle.bt-download{ :href => "#", "data-toggle" => "dropdown" } 
-                %i.icon-white.icon-download
-                %span.visible-desktop Download
+              %a.btn.btn-sm.btn-primary.dropdown-toggle.bt-download{ :href => "#", "data-toggle" => "dropdown" } 
+                %i.fa.fa-download
+                %span.hidden-sm-down Download
                 %span.caret
-              %ul.dropdown-menu
-                %li
-                  %a{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
-                
+              .dropdown-menu
+                %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
+            
                 - unless crt.cn === CONFIG['ca']['root']['cn']               
-                  %li
-                    %a{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
-                  %li
-                    %a{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
-              
+                  %a.dropdown-item{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
+                  %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
+          
                 - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
-                  %li
-                    %a{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key
-                  %li
-                    %a{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12
+                  %a.dropdown-item{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key
+                  %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12
             - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
-              %a.btn.btn-danger.btn-small{ :href => "/admin/certificates/#{crt.cn}/revoke" }
-                %i.icon-white.icon-remove
-                %span.visible-desktop Revoke
-                  
+              %a.btn.btn-danger.btn-sm{ :href => "/admin/certificates/#{crt.cn}/revoke" }
+                %i.fa.fa-remove
+                %span.hidden-sm-down Revoke
+                
 -if !@revokeds.empty?
   %legend Revoked Certificates     			  
   %table.table.table-striped.table-hover
@@ -54,6 +49,6 @@
           %td 
             %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
               %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-              %button.btn.btn-danger.btn-small{ :type => 'submit' }
-                %i.icon-white.icon-trash
-                %span.visible-desktop Delete
+              %button.btn.btn-danger.btn-sm{ :type => 'submit' }
+                %i.fa.fa-trash
+                %span.hidden-sm-down Delete

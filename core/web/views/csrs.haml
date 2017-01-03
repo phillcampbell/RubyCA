@@ -1,71 +1,66 @@
 %h2 Certificate Signing Requests
 - if @csrs.any?
-  %legend Awaiting Signature        
-  %table.table.table-striped.table-hover
+  %legend Awaiting Signature
+  %table.table.table-striped.table-hover.table-sm
     %thead
       %tr
-        %th Common Name
-        %th Organization
-        %th Locality
-        %th State
-        %th Country Code
+        %th Name
+        -#%th Org
+        -#%th Loc
+        -#%th State
+        -#%th Country
         %th
     %tbody
       - @csrs.each do |csr|
         %tr
-          %td 
+          %td
             = csr.cn
-          %td 
-            = csr.o
-          %td 
-            = csr.l
-          %td 
-            = csr.st
-          %td 
-            = csr.c
-          %td 
+          -#%td 
+            -#= csr.o
+          -#%td
+            -#= csr.l
+          -#%td 
+            -#= csr.st
+          -#%td
+            -#= csr.c
+          %td.pull-right
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
-              .btn-group
-                %a.btn.btn-small.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
-                  %i.icon-white.icon-info-sign
-                  %span.visible-desktop Info
-                %a.btn.btn-primary.btn-small{ href: "/admin/csrs/#{csr.cn}/sign" }
-                  %i.icon-white.icon-pencil
-                  %span.visible-desktop Sign
+              .btn-group{role: "group" }
+                %a.btn.btn-sm.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
+                  %i.fa.fa-info
+                  %span.hidden-sm-down Info
+                %a.btn.btn-primary.btn-sm{ href: "/admin/csrs/#{csr.cn}/sign" }
+                  %i.fa.fa-pencil
+                  %span.hidden-sm-down Sign
                 %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-                %button.btn.btn-danger.btn-small{ :type => 'submit' }
-                  %i.icon-white.icon-trash
-                  %span.visible-desktop Delete
-
+                %button.btn.btn-danger.btn-sm{ :type => 'submit' }
+                  %i.fa.fa-trash
+                  %span.hidden-sm-down Delete
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
-  %fieldset
+  %fieldset.form-group
     %legend Create CSR
-    .control-group
-      %label.control-label{ for: 'cn' } Common Name
-      .controls
-        %input#cn{ name: 'csr[cn]', type: 'text', placeholder: 'e.g. www.acme.com', value: @csr.nil? ? '' : @csr[:cn] }
-    .control-group
-      %label.control-label{ for: 'o' } Organisation
-      .controls
-        %input#o{ name: 'csr[o]', type: 'text', placeholder: 'e.g. ACME Ltd', value: @csr.nil? ? '' : @csr[:o] }
-    .control-group
-      %label.control-label{ for: 'l' } Locality
-      .controls
-        %input#l{ name: 'csr[l]', type: 'text', placeholder: 'e.g. Birmingham', value: @csr.nil? ? '' : @csr[:l] }
-    .control-group
-      %label.control-label{ for: 'st' } State
-      .controls
-        %input#st{ name: 'csr[st]', type: 'text', placeholder: 'e.g. West Midlands', value: @csr.nil? ? '' : @csr[:st] }
-    .control-group
-      %label.control-label{ for: 'c' } Country Code
-      .controls
-        %input#c{ name: 'csr[c]', type: 'text', placeholder: 'e.g. GB', value: @csr.nil? ? '' : @csr[:c] }
-    .control-group
-      %label.control-label{ for: 'passphrase' } Key Passphrase
-      .controls
-        %input#passphrase{ name: 'csr[passphrase]', type: 'password', placeholder: '' }
-    .control-group
-      .controls
-        %button.btn.btn-primary{ type: 'submit' } Create New
-        - if !@csr.nil?
-          %a.btn.btn{ href: "/admin/csrs/cancel" } Cancel
+    .row
+      .col-xs-12.col-md-6
+        .form-group
+          %label{ for: 'cn' } Common Name
+          %input.form-control#cn{ name: 'csr[cn]', type: 'text', placeholder: 'e.g. www.acme.com', value: @csr.nil? ? '' : @csr[:cn] }
+        .form-group
+          %label{ for: 'o' } Organisation
+          %input.form-control#o{ name: 'csr[o]', type: 'text', placeholder: 'e.g. ACME Ltd', value: @csr.nil? ? '' : @csr[:o] }
+        .form-group
+          %label{ for: 'l' } Locality
+          %input.form-control#l{ name: 'csr[l]', type: 'text', placeholder: 'e.g. Birmingham', value: @csr.nil? ? '' : @csr[:l] }
+      .col-xs-12.col-md-6
+        .form-group
+          %label{ for: 'st' } State
+          %input.form-control#st{ name: 'csr[st]', type: 'text', placeholder: 'e.g. West Midlands', value: @csr.nil? ? '' : @csr[:st] }
+        .form-group
+          %label{ for: 'c' } Country Code
+          %input.form-control#c{ name: 'csr[c]', type: 'text', placeholder: 'e.g. GB', value: @csr.nil? ? '' : @csr[:c] }
+        .form-group
+          %label{ for: 'passphrase' } Key Passphrase
+          %input.form-control#passphrase{ name: 'csr[passphrase]', type: 'password', placeholder: '' }
+    .form-group
+      %button.btn.btn-primary{ type: 'submit' } Create New
+      - if !@csr.nil?
+        %a.btn.btn.btn-secondary{ href: "/admin/csrs/cancel" } Cancel

@@ -1,6 +1,6 @@
 %h2 Renew CRL
 %legend Selected Certificate
-%table.table.table-striped.table-hover
+%table.table.table-striped.table-hover.table-sm
   %thead
     %tr
       %th Issuer Common Name
@@ -15,10 +15,8 @@
 %form#csr.form-horizontal{ action: "/admin/crl/renew", method: 'post' }
   %fieldset
     %legend Enter Passphrase
-    .control-group
-      %label.control-label{ for: 'intermediate' } Intermediate CA Key
-      .controls
-        %input#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
-    .control-group
-      .controls
-        %button.btn.btn-primary{ type: 'submit' } Renew CRL        
+    .form-group
+      %label{ for: 'intermediate' } Intermediate CA Key
+      %input.form-control#intermediate{ name: 'passphrase[intermediate]', type: 'password', placeholder: '' }
+    .form-group
+      %button.btn.btn-primary{ type: 'submit' } Renew CRL        

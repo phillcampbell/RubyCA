@@ -152,7 +152,7 @@ module RubyCA
         get '/admin/crl/renew' do
           @crl_info = get_crl_info 
           if !@crl_info[:expired]
-            flash.next[:error] = "CRL renew is not necessary."
+            flash.next[:danger] = "CRL renew is not necessary."
             redirect '/admin/crl'
           else
             haml :crlrenew
@@ -165,7 +165,7 @@ module RubyCA
             intermediate_key = OpenSSL::PKey::RSA.new intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError
             session[:sign] = params
-            flash.next[:error] = "Incorrect intermediate CA key passphrase"
+            flash.next[:danger] = "Incorrect intermediate CA key passphrase"
             redirect "/admin/crl/renew"
           end
           intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt 
@@ -174,7 +174,7 @@ module RubyCA
           crl = OpenSSL::X509::CRL.new crl_rec.crl
           
           if Time.now.utc < Time.parse(crl.next_update().to_s)
-            flash.next[:error] = "CRL is not expired. Renew is not necessary"
+            flash.next[:danger] = "CRL is not expired. Renew is not necessary"
             redirect '/admin/crl'
           end
           
@@ -206,7 +206,7 @@ module RubyCA
           params[:csr].each do |k,v|
             if v.nil? || v.empty?
               session[:csr] = params[:csr]
-              flash.next[:error] = "All fields are required"
+              flash.next[:danger] = "All fields are required"
               redirect '/admin/csrs'
             end  
           end
@@ -215,7 +215,7 @@ module RubyCA
             cn = params[:csr][:cn]
             session[:csr] = params[:csr]
             session[:csr][:cn] = nil
-            flash.next[:error] = "A certificate signing request already exists for <strong>'Common Name: =#{cn}'</strong>"
+            flash.next[:danger] = "A certificate signing request already exists for <strong>'Common Name: =#{cn}'</strong>"
             redirect '/admin/csrs'
           end
           
@@ -259,7 +259,7 @@ module RubyCA
         
         get '/admin/csrs/:cn/sign/?' do     
           if RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-            flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
+            flash.next[:danger] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
             redirect '/admin/csrs'
           end
           @csr = RubyCA::Core::Models::CSR.get(params[:cn])
@@ -289,7 +289,7 @@ module RubyCA
         post '/admin/csrs/:cn/sign/?' do
           session.delete(:sign)
           if RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-            flash.next[:error] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before sign this request"
+            flash.next[:danger] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before sign this request"
             redirect '/admin/csrs'
           end
           @csr = RubyCA::Core::Models::CSR.get(params[:cn])
@@ -298,7 +298,7 @@ module RubyCA
             intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError
             session[:sign] = params
-            flash.next[:error] = "Incorrect intermediate passphrase"
+            flash.next[:danger] = "Incorrect intermediate passphrase"
             redirect "/admin/csrs/#{params[:cn]}/sign"
           end
           
@@ -394,7 +394,7 @@ module RubyCA
         get '/admin/certificates/decrypted/:cn.pem' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Root or intermediate decrypted private key are disabled"
+            flash.next[:danger] = "Root or intermediate decrypted private key are disabled"
             redirect '/admin/certificates'
           else
             haml :rsadecrypt
@@ -404,7 +404,7 @@ module RubyCA
         post '/admin/certificates/decrypted/:cn.pem' do   
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Root or intermediate decrypted private key are disabled"
+            flash.next[:danger] = "Root or intermediate decrypted private key are disabled"
             redirect '/admin/certificates'
           else
             begin
@@ -412,7 +412,7 @@ module RubyCA
               content_type :pem
               deckey.to_pem
             rescue OpenSSL::PKey::RSAError
-              flash.next[:error] = "Incorrect certificate passphrase"
+              flash.next[:danger] = "Incorrect certificate passphrase"
               redirect "/admin/certificates/decrypted/#{params[:cn]}.pem"
             end
           end
@@ -421,7 +421,7 @@ module RubyCA
         get '/admin/certificates/:cn.p12' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Root or intermediate pkcs12 certificates are disabled"
+            flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled"
             redirect '/admin/certificates'
           else
             haml :pkcs12
@@ -436,7 +436,7 @@ module RubyCA
           root_int_ca = OpenSSL::X509::Certificate.new rawintCA
           
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Root or intermediate pkcs12 certificates are disabled"
+            flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled"
             redirect '/admin/certificates'
           else
             raw = @crt.crt
@@ -444,7 +444,7 @@ module RubyCA
             begin
               deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
             rescue OpenSSL::PKey::RSAError
-              flash.next[:error] = "Incorrect certificate passphrase"
+              flash.next[:danger] = "Incorrect certificate passphrase"
               redirect "/admin/certificates/#{params[:cn]}.p12"
             end
             
@@ -453,7 +453,7 @@ module RubyCA
               content_type :p12
               p12.to_der
             rescue OpenSSL::PKCS12::PKCS12Error
-              flash.next[:error] = "Error in pkcs12 generate"
+              flash.next[:danger] = "Error in pkcs12 generate"
               redirect "/admin/certificates/#{params[:cn]}.p12"
             end
             #redirect "/admin/certificates"
@@ -463,7 +463,7 @@ module RubyCA
         get '/admin/certificates/:cn/revoke/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Cannot revoke the root or intermediate certificates"
+            flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
             redirect '/admin/certificates'
           end
           haml :revoke
@@ -472,7 +472,7 @@ module RubyCA
         delete '/admin/certificates/:cn/revoke/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
-            flash.next[:error] = "Cannot revoke the root or intermediate certificates"
+            flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
             redirect '/admin/certificates'
           end
           crt = OpenSSL::X509::Certificate.new RubyCA::Core::Models::Certificate.get_by_cn(@crt.cn).crt
@@ -483,7 +483,7 @@ module RubyCA
           begin
             intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError
-            flash.next[:error] = "Incorrect intermediate passphrase"
+            flash.next[:danger] = "Incorrect intermediate passphrase"
             redirect "/admin/certificates/#{params[:cn]}/revoke"
           end
           @crl = RubyCA::Core::Models::CRL.get(1)
