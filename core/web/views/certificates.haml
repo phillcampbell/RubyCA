@@ -12,14 +12,14 @@
         %td.pull-right
           .btn-group
             %a.btn.btn-sm.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" }
-              %i.fa.fa-info
+              %i.fa.fa-info-circle
               %span.hidden-sm-down Info
-            .btn-group                           
+            .btn-group
               %a.btn.btn-sm.btn-primary.dropdown-toggle.bt-download{ :href => "#", "data-toggle" => "dropdown" } 
                 %i.fa.fa-download
                 %span.hidden-sm-down Download
                 %span.caret
-              .dropdown-menu
+              .dropdown-menu.dropdown-menu-right
                 %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate
             
                 - unless crt.cn === CONFIG['ca']['root']['cn']               

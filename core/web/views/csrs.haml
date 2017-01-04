@@ -4,30 +4,22 @@
   %table.table.table-striped.table-hover.table-sm
     %thead
       %tr
-        %th Name
-        -#%th Org
-        -#%th Loc
-        -#%th State
-        -#%th Country
+        %th Common Name
+        %th Organization
         %th
     %tbody
       - @csrs.each do |csr|
         %tr
           %td
             = csr.cn
-          -#%td 
-            -#= csr.o
-          -#%td
-            -#= csr.l
-          -#%td 
-            -#= csr.st
-          -#%td
-            -#= csr.c
+          %td 
+            = csr.o
+          
           %td.pull-right
             %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
               .btn-group{role: "group" }
                 %a.btn.btn-sm.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
-                  %i.fa.fa-info
+                  %i.fa.fa-info-circle
                   %span.hidden-sm-down Info
                 %a.btn.btn-primary.btn-sm{ href: "/admin/csrs/#{csr.cn}/sign" }
                   %i.fa.fa-pencil

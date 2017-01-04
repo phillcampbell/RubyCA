@@ -18,16 +18,15 @@ module RubyCA
         
         keyusages = {
           'nonRepudiation' => false,
-          'digitalSignature' => false,
-          'dataEncipherment' => false,
+          'digitalSignature' => true,
+          'dataEncipherment' => true,
           'keyEncipherment' => false,
           'keyAgreement' => false,
-          'dataEncipherment' => false,
           'cRLSign' => false
         }
         
         extendedkeyusages = { 
-          'clientAuth' => false,
+          'clientAuth' => true,
           'serverAuth' => false,
           'emailProtection' => false,
           'ipsecEndSystem' => false,
