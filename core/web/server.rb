@@ -17,11 +17,11 @@ module RubyCA
         mime_type :pem, 'pem/pem'
         
         keyusages = {
-          'nonRepudiation' => false,
           'digitalSignature' => true,
           'dataEncipherment' => true,
           'keyEncipherment' => false,
           'keyAgreement' => false,
+          'nonRepudiation' => false,
           'cRLSign' => false
         }
         
@@ -35,8 +35,7 @@ module RubyCA
           #'1.3.6.1.5.5.8.2.2' => false #iKEIntermediate
         }
         
-        helpers do
-          
+        helpers do          
           def hosts_allowed?
             allowed = false
             remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
@@ -70,7 +69,7 @@ module RubyCA
 
           def authorized?
             auth = Rack::Auth::Basic::Request.new(request.env)
-            auth.provided? && auth.basic? && auth.credentials && @user == Digest::MD5.hexdigest(auth.credentials[0]) && @pass == Digest::MD5.hexdigest(auth.credentials[1])
+            auth.provided? && auth.basic? && auth.credentials && @user == Digest::SHA2.hexdigest(auth.credentials[0]) && @pass == Digest::SHA2.hexdigest(auth.credentials[1])
           end
           
           def get_crl_info
@@ -116,24 +115,91 @@ module RubyCA
           haml :admin
         end
         
-        get '/admin/setup' do
+        get '/admin/config' do
           @authcfg = CONFIG['web']['admin']['auth']
-          haml :setup
+          @allowed_ips = CONFIG['web']['admin']['allowed_ips']
+          @my_ip = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
+          haml :config
         end
         
         
-        post '/admin/setup' do
-          CONFIG['web']['admin']['auth'] ||={}
-          username = params[:authcfg][:username]
-          password = params[:authcfg][:password]
-          enable = params[:authcfg][:enable] == "1" ? true : false
+        post '/admin/config' do
           
-          CONFIG['web']['admin']['auth']['username'] = Digest::MD5.hexdigest(username) unless username.nil? || username.empty?
-          CONFIG['web']['admin']['auth']['password'] = Digest::MD5.hexdigest(password) unless password.nil? || password.empty?
-          CONFIG['web']['admin']['auth']['enable'] = enable
-          File.open($root_dir+'/config.yaml', 'w') {|f| YAML.dump(CONFIG, f) } #Store
-          flash.next[:success] = "Admin authentication settings stored"
-          redirect '/admin/setup'
+          cfg_file = $root_dir + '/config.yaml'
+          puts params
+          if File.writable?(cfg_file)
+            
+            #Simple User and password auth
+            if params[:authcfg][:auth]
+              CONFIG['web']['admin']['auth'] ||={}
+          
+              username = params[:authcfg][:username]
+              password = params[:authcfg][:password]
+              confirm_password = params[:authcfg][:confirm_password]
+              enable = params[:authcfg][:enable] == "1" ? true : false
+              
+              unless username.nil? || username.empty? || password.nil? || password.empty? || confirm_password.nil? || confirm_password.empty?
+                if password == confirm_password
+                  CONFIG['web']['admin']['auth']['username'] = Digest::SHA2.hexdigest(username) 
+                  CONFIG['web']['admin']['auth']['password'] = Digest::SHA2.hexdigest(password)
+                  CONFIG['web']['admin']['auth']['enable'] = enable
+          
+                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+          
+                  flash.next[:success] = "Admin authentication settings stored"
+                else
+                  flash.next[:danger] = "Password and confirm password does not match."
+                end
+              else
+                flash.next[:danger] = "Username, Password and Confirm Password cannot be blank."
+              end
+            end
+          
+            #Allow IP Address
+            if params[:authcfg][:allow_ip]
+              CONFIG['web']['admin']['allowed_ips'] ||={}
+              begin
+                ip = IPAddress params[:authcfg][:ip]              
+              rescue  
+                flash.next[:danger] =  "Invalid network or ip address! <b>(#{params[:authcfg][:ip]})</b>"
+              end
+            
+              unless ip.nil?          
+                unless CONFIG['web']['admin']['allowed_ips'].include? params[:authcfg][:ip]
+                    
+                  if ip.network?
+                    CONFIG['web']['admin']['allowed_ips'].push("#{ip}/#{ip.prefix}")
+                  else
+                    CONFIG['web']['admin']['allowed_ips'].push("#{ip}")
+                  end
+              
+                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                  flash.next[:success] = "<b>#{params[:authcfg][:ip]}</b> added to allowed ips."
+                else
+                  flash.next[:warning] = "#{params[:authcfg][:ip]} is already in the allowed ips."
+                end
+              end
+            end
+          
+            #Disallow IP Address
+            if params[:authcfg][:disallow_ips]
+              CONFIG['web']['admin']['allowed_ips'] ||={}
+            
+              params[:authcfg][:ips].each do |ip|
+                CONFIG['web']['admin']['allowed_ips'].delete("#{ip}")
+              end
+            
+              File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+              CONFIG = YAML.load(File.read(cfg_file)) # Reload
+              flash.next[:success] = "<b>#{params[:authcfg][:ips]}</b> deleted from allowed ips."
+            end
+          else
+            flash.next[:danger] = "#{cfg_file} is not writable. Fix it before set anything here."
+          end
+                    
+          redirect '/admin/config'
         end
                 
         get '/admin/crl' do

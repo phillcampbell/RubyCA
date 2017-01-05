@@ -24,3 +24,8 @@ body .container .container-fluid {
 table {
   table-layout: fixed;
 }
+
+legend {
+  padding-top: 10px;
+  padding-bottom: 20px;
+}

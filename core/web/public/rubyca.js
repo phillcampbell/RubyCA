@@ -1,7 +1,7 @@
-/*
-Generic bootstrap 4 modal dialog to get plain text using ajax
-*/
 jQuery( document ).ready(function( $ ) {
+  /*
+  Generic bootstrap 4 modal dialog to get plain text using ajax
+  */
   $.fn.infomodal = function(title) {
     if(title===undefined || title===null ){
       title= "Info"
@@ -48,5 +48,20 @@ jQuery( document ).ready(function( $ ) {
         $('<p/>').html("Woops. Error on get info.<br/><br/>"+ jqXHR.status + " " + errorThrown).infomodal("Error");
       }
     });
-  });  
+  });
+  
+  $('[data-toggle="tooltip"]').tooltip();
+  
+  $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
+    var id = this.id;
+    setTimeout(function () {
+      $('#' + id).tooltip('hide'); 
+    }, 2000);
+  });
+  
+  //Tests
+  $("#remove_ip").click(function(e) {
+    var allowed_ips = $("#allowed_ips").val();
+    console.log(allowed_ips);
+  });
 });

@@ -3,23 +3,14 @@
 %table.table.table-striped.table-hover.table-sm
   %thead
     %tr
-      %th Name
-      %th Org
-      %th Local
-      %th State
-      %th Country
+      %th Common Name
+      %th Organization
   %tbody
     %tr
       %td 
         = @csr.cn
       %td 
         = @csr.o
-      %td 
-        = @csr.l
-      %td 
-        = @csr.st
-      %td 
-        = @csr.c
 
 %form#csr.form-horizontal{ action: "/admin/csrs/#{@csr.cn}/sign", method: 'post' }
   %fieldset

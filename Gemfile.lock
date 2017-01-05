@@ -23,7 +23,7 @@ GEM
     eventmachine (1.2.1)
     haml (4.0.4)
       tilt
-    ipaddress (0.8.0)
+    ipaddress (0.8.3)
     multi_json (1.8.2)
     rack (1.6.5)
     rack-protection (1.5.3)

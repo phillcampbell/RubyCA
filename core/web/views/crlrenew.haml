@@ -4,13 +4,13 @@
   %thead
     %tr
       %th Issuer Common Name
-      %th Expired On
+      %th Expired On (UTC)
   %tbody
     %tr
       %td 
         = @crl_info[:issuer]["CN"]
       %td
-        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S UTC")  
+        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S")  
 
 %form#csr.form-horizontal{ action: "/admin/crl/renew", method: 'post' }
   %fieldset
