@@ -9,7 +9,7 @@
       %td 
         = @crt.cn
 
-%form#csr.form-horizontal{ action: "/admin/certificates/#{@crt.cn}.p12", method: 'post' }
+%form#pkcs12.form-horizontal{ action: "/admin/certificates/#{@crt.cn}.p12", method: 'post' }
   %fieldset
     %legend Enter Passphrase
     .form-group

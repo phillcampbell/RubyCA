@@ -4,7 +4,7 @@ if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed
 puts ''
 puts "RubyCA Version #{IO.binread($root_dir + '/version')}"
 puts '------------------'
-
+puts Time.now.strftime("%H:%M:%S %d-%m-%Y %Z")
 # These requires allow the Gemfile to work
 require 'rubygems'
 require 'bundler/setup'

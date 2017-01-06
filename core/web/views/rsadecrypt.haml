@@ -9,7 +9,7 @@
       %td 
         = @crt.cn
 
-%form#csr.form-horizontal{ action: "/admin/certificates/decrypted/#{@crt.cn}.pem", method: 'post' }
+%form#decrypt_rsa.form-horizontal{ action: "/admin/certificates/decrypted/#{@crt.cn}.pem", method: 'post' }
   %fieldset
     %legend Enter Passphrase
     .form-group
