@@ -52,10 +52,10 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
   # CRL distribuition URI. 
   # if URI is blank or null use auto generation URI based on config.
-  if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+  if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? | CONFIG['ca']['crl']['dist']['uri'] ===''
     crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
   else
-    crldist = "URI:#{CONFIG['crlDist']['uri']}"
+    crldist = "URI:#{CONFIG['ca']['crl']['dist']['uri']}"
   end
   root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "#{crldist}"
   
@@ -96,10 +96,11 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
   # CRL distribuition URI. 
   # if URI is blank or null use auto generation URI based on config.
-  if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+  
+  if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? || CONFIG['ca']['crl']['dist']['uri'] ===''
     crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
   else
-    crldist = "URI:#{CONFIG['crlDist']['uri']}"
+    crldist = "URI:#{CONFIG['ca']['crl']['dist']['uri']}"
   end
   intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "#{crldist}"
   

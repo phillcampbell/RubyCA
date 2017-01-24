@@ -1,8 +1,10 @@
 if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed to be called directly. Please run ./RubyCA instead.' end
 
+VERSION=IO.binread($root_dir + '/version')
+
 # Print welcome message
 puts ''
-puts "RubyCA Version #{IO.binread($root_dir + '/version')}"
+puts "RubyCA Version #{VERSION}"
 puts '------------------'
 puts Time.now.strftime("%H:%M:%S %d-%m-%Y %Z")
 # These requires allow the Gemfile to work
@@ -25,4 +27,4 @@ unless File.exists?(cfg_file) or File.file?(cfg_file)
   abort
 end
 # Load config.yaml into global CONFIG
-CONFIG = YAML.load(File.read(cfg_file)) 
+CONFIG = YAML.load(File.read(cfg_file))

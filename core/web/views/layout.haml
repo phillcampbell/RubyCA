@@ -10,23 +10,27 @@
     %link{ href: '/rubyca.css', rel: 'stylesheet' }
     
   %body
-    .container
-      %nav.navbar.bg-faded.navbar-dark.bg-inverse
-        %button.navbar-toggler.hidden-sm-up{type: "button", "data-toggle"=>"collapse", "data-target" => "#navbar-header", |
-          "aria-controls" => "navbar-header", "aria-expanded" => "false", "aria-label"=>"Toggle navigation"}
-        
-        .collapse.navbar-toggleable-xs{id: "navbar-header" }
+    %header
+      %nav.navbar.navbar-inverse.bg-inverse.navbar-toggleable-md.bg-faded
+        .container
+          %button.navbar-toggler.navbar-toggler-right{type: "button", "data-toggle"=>"collapse", "data-target" => "#rubyca-navbar", |
+            "aria-controls" => "rubyca-navbar", "aria-expanded" => "false", "aria-label"=>"Toggle navigation"}
+            %span.navbar-toggler-icon
+          
           %a.navbar-brand{ href: '/admin' } RubyCA
-          %ul.nav.navbar-nav
-            %li.nav-item
-              %a.nav-link{ href: '/admin/certificates' } Certificates
-            %li.nav-item
-              %a.nav-link{ href: '/admin/csrs' } Signing Requests
-            %li.nav-item
-              %a.nav-link{ href: '/admin/crl' } CRL
-            %li.nav-item
-              %a.nav-link{ href: '/admin/config' } Settings
-      .container-fluid
+
+          .collapse.navbar-collapse{id: "rubyca-navbar" }
+            %ul.navbar-nav.mr-auto
+              %li.nav-item
+                %a.nav-link{ href: '/admin/certificates' } Certificates
+              %li.nav-item
+                %a.nav-link{ href: '/admin/csrs' } Signing Requests
+              %li.nav-item
+                %a.nav-link{ href: '/admin/crl' } CRL
+              %li.nav-item
+                %a.nav-link{ href: '/admin/config' } Settings
+    %section
+      .container
         =styled_flash
         = yield
         

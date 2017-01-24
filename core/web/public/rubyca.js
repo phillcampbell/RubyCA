@@ -13,8 +13,8 @@ jQuery( document ).ready(function( $ ) {
           $("<div/>", {class: "modal-content"}).append(
             // Header
             $("<div/>", {class: "modal-header"}).append(
-              $("<button/>", {class: "close", "data-dismiss": "modal",  type: "button"}).html('<span aria-hidden="true">&times;</span>'),
-              $("<h3/>").text(title)
+              $("<h3/>").text(title),
+              $("<button/>", {class: "close", "data-dismiss": "modal",  type: "button"}).html('<span aria-hidden="true">&times;</span>')
             ),
             // Body
             $("<div/>", {class: "modal-body"}).append(this),
@@ -108,7 +108,6 @@ jQuery( document ).ready(function( $ ) {
                 window.location = downloadUrl;
             }
 
-            setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
             setTimeout(function () { URL.revokeObjectURL(downloadUrl); }, 100); // cleanup
         }
       }

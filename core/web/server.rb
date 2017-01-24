@@ -123,14 +123,13 @@ module RubyCA
         end
         
         
-        post '/admin/config' do
-          
+        post '/admin/config' do         
           cfg_file = $root_dir + '/config.yaml'
           puts params
           if File.writable?(cfg_file)
             
             #Simple User and password auth
-            if params[:authcfg][:auth]
+            if params[:authcfg][:auth] == '1'
               CONFIG['web']['admin']['auth'] ||={}
           
               username = params[:authcfg][:username]
@@ -157,7 +156,7 @@ module RubyCA
             end
           
             #Allow IP Address
-            if params[:authcfg][:allow_ip]
+            if params[:authcfg][:allow_ip] == '1'
               CONFIG['web']['admin']['allowed_ips'] ||={}
               begin
                 ip = IPAddress params[:authcfg][:ip]              
@@ -184,7 +183,7 @@ module RubyCA
             end
           
             #Disallow IP Address
-            if params[:authcfg][:disallow_ips]
+            if params[:authcfg][:disallow_ips] == '1'
               CONFIG['web']['admin']['allowed_ips'] ||={}
             
               params[:authcfg][:ips].each do |ip|
@@ -197,15 +196,31 @@ module RubyCA
             end
           else
             flash.next[:danger] = "#{cfg_file} is not writable. Fix it before set anything here."
-          end
-                    
+          end                    
           redirect '/admin/config'
         end
                 
         get '/admin/crl' do
-          @crl_info = get_crl_info 
+          @crl_info = get_crl_info
+          @crl_dist = CONFIG['ca']['crl']['dist']['uri']
           haml :crl
         end
+        
+        post '/admin/crl/config' do
+          #Add
+          if params[:ca][:crl][:dist][:add_uri] == '1'
+            puts "add"
+            puts params
+          end
+          
+          #Remove
+          if params[:ca][:crl][:dist][:rm_uri] == '1'
+            puts "remove"
+            puts params
+          end
+          redirect '/admin/crl'
+        end
+        
         
         get '/admin/crl/info' do
           crl_rec = RubyCA::Core::Models::CRL.last
@@ -327,6 +342,7 @@ module RubyCA
             flash.next[:danger] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
             redirect '/admin/csrs'
           end
+          
           @csr = RubyCA::Core::Models::CSR.get(params[:cn])
           @sign = session[:sign]
           
@@ -377,7 +393,7 @@ module RubyCA
           @serial.save
           crt.version = 2
           crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
-          crt.not_after = crt.not_before  + (CONFIG['certificate']['years'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['certificate']['years'] / 4).to_int * 24 * 60 * 60)
+          crt.not_after = crt.not_before + (CONFIG['ca']['certificate']['default_expiration'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['certificate']['default_expiration'] / 4).to_int * 24 * 60 * 60)
           crt.subject = csr.subject
           crt.public_key = csr.public_key
           crt.issuer = intermediate_crt.subject
@@ -392,10 +408,10 @@ module RubyCA
           altnames = params[:subjectAltName].reject{|k,v| v.empty?}
           crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" unless altnames.empty? 
           
-          if CONFIG['crlDist'].nil? || CONFIG['crlDist']['uri'].nil? || CONFIG['crlDist']['uri'] ===''
+          if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? || CONFIG['ca']['crl']['dist']['uri'] ===''
             crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
           else
-            crldist = "URI:#{CONFIG['crlDist']['uri']}"
+            crldist = CONFIG['ca']['crl']['dist']['uri'].map{|uri| "URI:#{uri}"}.join(',')
           end
           crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "#{crldist}"
           
@@ -511,17 +527,18 @@ module RubyCA
             rescue OpenSSL::PKey::RSAError
               flash.next[:danger] = "Incorrect certificate passphrase"
               redirect "/admin/certificates/#{params[:cn]}.p12"
+              
             end
             
             begin
               p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
               content_type :p12
               p12.to_der
+              
             rescue OpenSSL::PKCS12::PKCS12Error
               flash.next[:danger] = "Error in pkcs12 generate"
               redirect "/admin/certificates/#{params[:cn]}.p12"
             end
-            #redirect "/admin/certificates"
           end
         end
         

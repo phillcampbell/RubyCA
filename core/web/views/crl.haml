@@ -1,28 +1,50 @@
 %h2 CRL
-%table.table.table-striped.table-hover.table-sm
-  %thead
-    %tr
-      %th Issuer Common Name
-      %th Last Update (UTC)
-      %th Next Update (UTC)
-      %th
-  %tbody
-    %tr
-      %td
-        = @crl_info[:issuer]["CN"]
-      %td
-        = @crl_info[:last_update].strftime("%d/%m/%y %H:%M:%S")
-      %td
-        = @crl_info[:next_update].strftime("%d/%m/%y %H:%M:%S")  
-      %td.pull-right
-        .btn-group
-          %a.btn.btn-sm.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
-            %i.fa.fa-info-circle
-            %span.hidden-sm-down Info
-          %a.btn.btn-sm.btn-primary{ :href => "/ca.crl"}
-            %i.fa.fa-download
-            %span.hidden-sm-down Download 
-          - if @crl_info[:expired]
-            %a.btn.btn-sm.btn-warning{ :href => "/admin/crl/renew"}
-              %i.fa.fa-refresh
-              %span.hidden-sm-down Renew
+.row
+  %legend Current CRL
+  %table.table.table-striped.table-hover.table-sm
+    %thead
+      %tr
+        %th Issuer Common Name
+        %th Last Update (UTC)
+        %th Next Update (UTC)
+        %th
+    %tbody
+      %tr
+        %td
+          = @crl_info[:issuer]["CN"]
+        %td
+          = @crl_info[:last_update].strftime("%d/%m/%y %H:%M:%S")
+        %td
+          = @crl_info[:next_update].strftime("%d/%m/%y %H:%M:%S")  
+        %td.pull-right
+          .btn-group
+            %a.btn.btn-sm.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
+              %i.fa.fa-info-circle
+              %span.hidden-sm-down Info
+            %a.btn.btn-sm.btn-primary{ :href => "/ca.crl"}
+              %i.fa.fa-download
+              %span.hidden-sm-down Download 
+            - if @crl_info[:expired]
+              %a.btn.btn-sm.btn-warning{ :href => "/admin/crl/renew"}
+                %i.fa.fa-refresh
+                %span.hidden-sm-down Renew
+.row
+  %legend Config
+  .col-md-6.col-xs-12.pull-left
+    %form#cfg_crl_add_uri{ action: "/admin/crl/config", method: 'post' }
+      .form-group
+        .input-group
+          %input{type: "hidden", value: "1", name: "ca[crl][dist][add_uri]"} 
+          %input.form-control#add_uri{ name: 'ca[crl][dist][uri]', type: 'text', placeholder: 'CRL Distribution Point url', |
+            'title' => 'e.g. http://domain.com/ca/ca.crl http://ca.domain.com/ca.crl', 'data-toggle' => 'tooltip'}
+          
+          %span.input-group-btn
+            %button.btn.btn-primary{ type: 'submit' } Add
+            
+    %form#cfg_crl_rm_uri{ action: "/admin/crl/config", method: 'post' }        
+      .form-group
+        %input{type: "hidden", value: "1", name: "ca[crl][dist][rm_uri]"} 
+        %select.form-control#rm_uri{ multiple: "true", name: "ca[crl][dist][uri][]" }
+          -@crl_dist.each do |uri|
+            %option{ value: "#{uri}" } #{uri}
+      %button.btn.btn-primary{ type: 'submit' } Remove Selected

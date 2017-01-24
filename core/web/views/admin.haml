@@ -1,8 +1,12 @@
 %h2 Welcome to RubyCA
 %p Use the links above to manage your certificates.
-%p
-  %b Remote IP:
-  #{request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip}
-%p
-  %b Agent:
-  #{request.env['HTTP_USER_AGENT']}
+.container
+  %p
+    %b Version: 
+    #{VERSION}
+  %p
+    %b Remote IP:
+    #{request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip}
+  %p
+    %b Agent:
+    #{request.env['HTTP_USER_AGENT']}

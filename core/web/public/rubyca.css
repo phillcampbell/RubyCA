@@ -1,23 +1,30 @@
-@media (min-width: 981px) {
-  #infomodal {
-    font-size: 70%;
-  }
+/* xs devices */
+@media (max-width: 575px) {
+  nav > .container {
+    width: 100%;
+  }    
 }
-
+/* md devices */
 @media (max-width: 980px) {
   #infomodal {
     font-size: 40%;
   }
 }
 
-body .container{
-  padding-bottom: 80px;
+/* lg devices */
+@media (min-width: 981px) {
+  #infomodal {
+    font-size: 70%;
+  }
 }
 
-body .container .container-fluid {
-  padding-left: 0px;
-  padding-right: 0px;
+body {
+  padding-bottom: 20px;
+}
+
+body > section > .container{
   padding-top: 30px;
+  padding-bottom: 80px;
   font-size: 80%;
 }
 
