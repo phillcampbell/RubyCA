@@ -9,12 +9,6 @@ web:
       enable: false # true require setup user and password on http://<server>:<port>/admin/setup. 
                     # false permit only allowed_ips without  authentication pass.
 
-privileges:
-  user: 'user' # The user to run as once privileges are dropped
-  group: 'group' # The group to run as once privileges are dropped
-  
-certificate:
-  years: 1 # Number of years certificates will be valid
 
 # Configuration relating to certificate authority
 ca:
@@ -33,8 +27,18 @@ ca:
     cn: "My Intermediate Certificate Authority"
     years: 20
 
-# CRL distribuition
-# if uri: is blank or null, URI is auto generated using top "web:" configurations.
-# last generated crl URI is http:// *host* : *port* /ca.crl
-crlDist:
-   uri: '' # e.g. http://www.example.com/ca.crl 
+  certificate:
+    default_expiration: 5 # Number of years certificates will be valid
+
+  crl:
+    default_expiration: 30 # Number of days crl will be valid
+    dist:
+      uri:
+        - '' # e.g. http://www.example.com/ca.crl
+        - '' # e.g. http://www.example.com:8080/ca/ca.crl
+
+#used only for RubyCA module
+privileges:
+  user: user
+  group: group
+

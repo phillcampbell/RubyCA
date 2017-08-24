@@ -86,11 +86,17 @@ module RubyCA
             crl_info[:issuer] = issuer
             crl_info[:last_update] = Time.parse(crl.last_update().to_s)
             crl_info[:next_update] = Time.parse(crl.next_update().to_s)
+            crl_info[:to_expire] = false
             crl_info[:expired] = false
             
             if Time.now.utc > crl_info[:next_update]
               crl_info[:expired] = true
             end
+            
+            if Time.now.utc + (5*24*60*60) > crl_info[:next_update]
+              crl_info[:to_expire] = true
+            end
+            
             crl_info
           end
         end
@@ -231,11 +237,11 @@ module RubyCA
         
         get '/admin/crl/renew' do
           @crl_info = get_crl_info 
-          if !@crl_info[:expired]
-            flash.next[:danger] = "CRL renew is not necessary."
-            redirect '/admin/crl'
-          else
+          if @crl_info[:expired] || @crl_info[:to_expire]
             haml :crlrenew
+          else            
+            flash.next[:danger] = "CRL renewal is not necessary."
+            redirect '/admin/crl'
           end
         end
         
@@ -249,17 +255,18 @@ module RubyCA
             redirect "/admin/crl/renew"
           end
           intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt 
+                    
+          crl_info = get_crl_info
+          unless !crl_info[:expired] && !crl_info[:to_expire]
+            flash.next[:danger] = "CRL is not expired or to expire. Renewal is not necessary."
+            redirect '/admin/crl'
+          end
           
           crl_rec = RubyCA::Core::Models::CRL.last
           crl = OpenSSL::X509::CRL.new crl_rec.crl
           
-          if Time.now.utc < Time.parse(crl.next_update().to_s)
-            flash.next[:danger] = "CRL is not expired. Renew is not necessary"
-            redirect '/admin/crl'
-          end
-          
           crl.last_update = Time.now
-          crl.next_update = Time.now + 60 * 60 * 24 * 30
+          crl.next_update = Time.now + 30 * 24 * 60 * 60
           crl.sign intermediate_key, OpenSSL::Digest::SHA512.new
           intermediate_key = nil
           crl_rec.crl = crl.to_pem

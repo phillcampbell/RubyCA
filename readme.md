@@ -40,7 +40,7 @@ Visit http://<host>:<port>/admin to manage certificates
 
 ## Tips
 
-RubyCA will be able to be run as daemon now.
+To be able to be run RubyCA as daemon
 
 Create the thin.yaml file and edit to suit your requirements.
 

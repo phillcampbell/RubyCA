@@ -36,7 +36,7 @@
                 
 -if !@revokeds.empty?
   %legend Revoked Certificates     			  
-  %table.table.table-striped.table-hover
+  %table.table.table-striped.table-hover.table-sm
     %thead
       %tr
         %td Common Name
@@ -46,9 +46,10 @@
         %tr
           %td 
             = crt.cn
-          %td 
-            %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
-              %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
-              %button.btn.btn-danger.btn-sm{ :type => 'submit' }
-                %i.fa.fa-trash
-                %span.hidden-sm-down Delete
+          %td.pull-right
+            .btn-group
+              %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
+                %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+                %button.btn.btn-danger.btn-sm{ :type => 'submit' }
+                  %i.fa.fa-trash
+                  %span.hidden-sm-down Delete
