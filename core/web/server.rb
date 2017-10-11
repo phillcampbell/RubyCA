@@ -257,7 +257,7 @@ module RubyCA
           intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt 
                     
           crl_info = get_crl_info
-          unless !crl_info[:expired] && !crl_info[:to_expire]
+          if !crl_info[:expired] && !crl_info[:to_expire]
             flash.next[:danger] = "CRL is not expired or to expire. Renewal is not necessary."
             redirect '/admin/crl'
           end
