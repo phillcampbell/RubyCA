@@ -16,15 +16,15 @@ Bundler.require(:default)
 require 'singleton'
 require "sinatra/reloader"
 
-# Test config.yml exists
-cfg_file = $root_dir + '/config.yaml'
-unless File.exists?(cfg_file) or File.file?(cfg_file)
+# Test config file exists
+CFG_FILE = $root_dir + '/config/rubyca.yaml'
+unless File.exists?(CFG_FILE) or File.file?(CFG_FILE)
   puts ''
-  puts 'Error: RubyCA requires config.yaml'
+  puts 'Error: RubyCA requires config/rubyca.yaml'
   puts "Please run create it"
   puts "You can learn more about this in readme.md"
   puts '------------------'
   abort
 end
-# Load config.yaml into global CONFIG
-CONFIG = YAML.load(File.read(cfg_file))
+# Load config into global CONFIG
+CONFIG = YAML.load(File.read(CFG_FILE))

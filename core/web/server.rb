@@ -130,8 +130,7 @@ module RubyCA
         
         
         post '/admin/config' do         
-          cfg_file = $root_dir + '/config.yaml'
-          if File.writable?(cfg_file)
+          if File.writable?(CFG_FILE)
             
             #Simple User and password auth
             if params[:authcfg][:auth] == '1'
@@ -148,8 +147,8 @@ module RubyCA
                   CONFIG['web']['admin']['auth']['password'] = Digest::SHA2.hexdigest(password)
                   CONFIG['web']['admin']['auth']['enable'] = enable
           
-                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
           
                   flash.next[:success] = "Admin authentication settings stored"
                 else
@@ -178,8 +177,8 @@ module RubyCA
                     CONFIG['web']['admin']['allowed_ips'].push("#{ip}")
                   end
               
-                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
                   flash.next[:success] = "<b>#{params[:authcfg][:ip]}</b> added to allowed ips."
                 else
                   flash.next[:warning] = "#{params[:authcfg][:ip]} is already in the allowed ips."
@@ -195,12 +194,12 @@ module RubyCA
                 CONFIG['web']['admin']['allowed_ips'].delete("#{ip}")
               end
             
-              File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-              CONFIG = YAML.load(File.read(cfg_file)) # Reload
+              File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+              CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
               flash.next[:success] = "<b>#{params[:authcfg][:ips]}</b> deleted from allowed ips."
             end
           else
-            flash.next[:danger] = "#{cfg_file} is not writable. Fix it before set anything here."
+            flash.next[:danger] = "#{CFG_FILE} is not writable. Fix it before set anything here."
           end                    
           redirect '/admin/config'
         end
@@ -212,9 +211,7 @@ module RubyCA
         end
         
         post '/admin/crl/config' do
-          cfg_file = $root_dir + '/config.yaml'
-
-          if File.writable?(cfg_file)
+          if File.writable?(CFG_FILE)
             
             #Add
             if params[:ca][:crl][:dist][:add_uri] == '1'
@@ -225,8 +222,8 @@ module RubyCA
               else
                 unless CONFIG['ca']['crl']['dist']['uri'].include? params[:ca][:crl][:dist][:uri]
                   CONFIG['ca']['crl']['dist']['uri'].push(params[:ca][:crl][:dist][:uri])
-                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
                   flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> added to crl distribution points list."
                 else
                   flash.next[:warning] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> is already in crl distribution points list."
@@ -243,8 +240,8 @@ module RubyCA
                   CONFIG['ca']['crl']['dist']['uri'].delete("#{uri}")
                 end
             
-                File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
                 flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> deleted from crl distribution points list."
               else
                 flash.next[:warning] = "Select the crl distribution point do you want delete."
@@ -252,7 +249,7 @@ module RubyCA
             end
             
           else
-            flash.next[:danger] = "#{cfg_file} is not writable. Fix it before set anything here."
+            flash.next[:danger] = "#{CFG_FILE} is not writable. Fix it before set anything here."
           end
           
           redirect '/admin/crl'

@@ -29,10 +29,10 @@ Use bundle to install dependencies
 
     $ bundle install
     
-Create the config.yaml file and edit to suit your requirements
+Create the ./config/rubyca.yaml file and edit to suit your requirements
 
-    $ cp ./config.yaml.sample ./config.yaml
-    $ nano ./config.yaml
+    $ cp ./config/rubyca.yaml.sample ./config/rubyca.yaml
+    $ nano ./config/rubyca.yaml
 
 RubyCA must be started as root on the first run to be able generate the ca certificates
 
@@ -46,19 +46,19 @@ To be able to be run RubyCA as daemon
 
 ####Using puma:
 
-    $ cp ./distrib/puma/puma-sample.rb ./puma.rb
+    $ cp ./distrib/puma/puma-sample.rb ./config/puma.rb
     nano ./puma.rb
 
 RubyCA must be started with:
 
-    $ bundle exec thin puma -C ./puma.rb    
+    $ bundle exec puma -C ./config/puma.rb    
 
 ####Using Thin:
 
 Create the thin.yaml file and edit to suit your requirements.
 
-    $ cp ./distrib/thin/thin.yaml.sample ./thin.yaml
-    $ nano ./thin.yaml
+    $ cp ./distrib/thin/thin.yaml.sample ./config/thin.yaml
+    $ nano ./config/thin.yaml
 
 Edit Gemfile to use thin server:
 
@@ -71,7 +71,7 @@ Run bundle:
   
 RubyCA must be started with:
 
-    $ bundle exec thin start -C ./thin.yaml
+    $ bundle exec thin start -C ./config/thin.yaml
 
 Note:
 The first run still needs RubyCA run as root to be able generate the ca certificates.
