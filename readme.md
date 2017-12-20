@@ -3,7 +3,7 @@
 ## About
 RubyCA is a simple certificate authority manager written in Ruby.
 
-Forked from https://github.com/phillcampbell/RubyCA.git
+This is a fork from https://github.com/phillcampbell/RubyCA
 
 It is designed for internal use as an alternative to using self signed certificates. Install and trust the root certificate in your clients and any certificates you create will just work, no more browser warnings.
 
@@ -19,16 +19,15 @@ The currently isn't much error checking, this will be added in the future.
 Pull requests welcome.
 
 ## Usage
-
 Clone and enter the repository
 
-    $ git clone https://github.com/oferreiro/RubyCA.git
+    $ git clone https://github.com/oferreiro/RubyCA
     $ cd RubyCA
 
 Use bundle to install dependencies
 
     $ bundle install
-    
+  
 Create the ./config/rubyca.yaml file and edit to suit your requirements
 
     $ cp ./config/rubyca.yaml.sample ./config/rubyca.yaml
@@ -37,23 +36,22 @@ Create the ./config/rubyca.yaml file and edit to suit your requirements
 RubyCA must be started as root on the first run to be able generate the ca certificates
 
     $ sudo ./RubyCA
-    
+  
 Visit http://<host>:<port>/admin to manage certificates
 
 ## Tips
-
 To be able to be run RubyCA as daemon
 
-####Using puma:
+### Using puma:
 
     $ cp ./distrib/puma/puma-sample.rb ./config/puma.rb
-    nano ./puma.rb
+    nano ./config/puma.rb
 
 RubyCA must be started with:
 
     $ bundle exec puma -C ./config/puma.rb    
 
-####Using Thin:
+### Using Thin:
 
 Create the thin.yaml file and edit to suit your requirements.
 
@@ -78,6 +76,6 @@ The first run still needs RubyCA run as root to be able generate the ca certific
   
     $ sudo ./RubyCA
 
-Or run in unsafe mode (-u|--unsafe) if you want keep user privileges on root ca private key.
+Or run in unsafe mode (-u|--unsafe) if you want keep current user privileges on root ca private key file.
 
     $./RubyCA --unsafe
