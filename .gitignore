@@ -1,9 +1,18 @@
-.DS_Store
 *.pem
 *.crt
 core/ca/last_serial
-Gemfile.lock
-
+tmp/*
+log/*
 *.db
+*-bak.*
+core/web/public/tmp
+private
+config/rubyca.yaml
+config/thin.yaml
+config/puma.rb
+.rbenv-gemsets
+.ruby-version
 
-config.yaml
+.DS_Store
+._*
+.AppleDouble

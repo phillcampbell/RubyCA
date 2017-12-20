@@ -9,7 +9,6 @@ module RubyCA
           property :name, String, unique: true, key: true
           property :value, String, required: true
       end
-    
     end
   end
 end

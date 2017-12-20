@@ -2,17 +2,14 @@
 web:
   domain: 'localhost' # The domain name to use
   interface: 'localhost' # The interface to bind the web server to, use '0.0.0.0' for all interfaces
-  port: 80 # The port the web server will run on
+  port: 8083 # The port the web server will run on
   admin: 
     allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
+    auth:
+      enable: false # true require setup user and password on http://<server>:<port>/admin/setup. 
+                    # false permit only allowed_ips without  authentication pass.
 
-privileges:
-  user: 'user' # The user to run as once privileges are dropped
-  group: 'group' # The group to run as once privileges are dropped
-  
-certificate:
-  years: 1 # Number of years certificates will be valid
-  
+
 # Configuration relating to certificate authority
 ca:
   root:
@@ -29,3 +26,18 @@ ca:
     organisation: "My Intermediate CA"
     cn: "My Intermediate Certificate Authority"
     years: 20
+
+  certificate:
+    default_expiration: 5 # Number of years certificates will be valid
+
+  crl:
+    default_expiration: 30 # Number of days crl will be valid
+    dist:
+      uri:
+       #- 'http://www.example.com/ca.crl' # e.g.
+
+#used only for RubyCA module
+privileges:
+#  user: user
+#  group: group
+

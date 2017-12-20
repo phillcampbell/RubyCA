@@ -3,6 +3,8 @@
 ## About
 RubyCA is a simple certificate authority manager written in Ruby.
 
+Forked from https://github.com/phillcampbell/RubyCA.git
+
 It is designed for internal use as an alternative to using self signed certificates. Install and trust the root certificate in your clients and any certificates you create will just work, no more browser warnings.
 
 ## Development
@@ -20,30 +22,62 @@ Pull requests welcome.
 
 Clone and enter the repository
 
-    $ git clone https://github.com/phillcampbell/RubyCA.git
+    $ git clone https://github.com/oferreiro/RubyCA.git
     $ cd RubyCA
 
 Use bundle to install dependencies
 
     $ bundle install
     
-Create the config.yaml file and edit to suit your requirements
+Create the ./config/rubyca.yaml file and edit to suit your requirements
 
-    $ cp ./config.yaml.sample ./config.yaml
-    $ nano ./config.yaml
+    $ cp ./config/rubyca.yaml.sample ./config/rubyca.yaml
+    $ nano ./config/rubyca.yaml
 
-RubyCA must be started as root on the first run to be able to generate the ca certificates
+RubyCA must be started as root on the first run to be able generate the ca certificates
 
     $ sudo ./RubyCA
     
-Visit http:// *host* : *port* /admin to manage certificates
+Visit http://<host>:<port>/admin to manage certificates
 
 ## Tips
 
-RubyCA will be able to be ran as a daemon if the future, but for now you can use 'screen' to run it in the background.
+To be able to be run RubyCA as daemon
 
-    $ screen -S 'RubyCA' -d -m ./RubyCA
-    
-You can then access the running screen session with:
-    
-    $ screen -r 'RubyCA'
+####Using puma:
+
+    $ cp ./distrib/puma/puma-sample.rb ./config/puma.rb
+    nano ./puma.rb
+
+RubyCA must be started with:
+
+    $ bundle exec puma -C ./config/puma.rb    
+
+####Using Thin:
+
+Create the thin.yaml file and edit to suit your requirements.
+
+    $ cp ./distrib/thin/thin.yaml.sample ./config/thin.yaml
+    $ nano ./config/thin.yaml
+
+Edit Gemfile to use thin server:
+
+    gem 'thin', '~> 1.7', '>= 1.7.2'
+    #gem 'puma', '~> 3.11'
+
+Run bundle:
+
+    $ bundle
+  
+RubyCA must be started with:
+
+    $ bundle exec thin start -C ./config/thin.yaml
+
+Note:
+The first run still needs RubyCA run as root to be able generate the ca certificates.
+  
+    $ sudo ./RubyCA
+
+Or run in unsafe mode (-u|--unsafe) if you want keep user privileges on root ca private key.
+
+    $./RubyCA --unsafe

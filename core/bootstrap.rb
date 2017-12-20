@@ -7,11 +7,13 @@ DataMapper.setup(:default, "sqlite3://#{$root_dir}/RubyCA.db")
 require 'core/models/config'
 require 'core/models/csr'
 require 'core/models/certificate'
+require 'core/models/revoked'
 require 'core/models/crl'
 DataMapper.finalize
 RubyCA::Core::Models::Config.auto_upgrade!
 RubyCA::Core::Models::CSR.auto_upgrade! 
 RubyCA::Core::Models::Certificate.auto_upgrade! 
+RubyCA::Core::Models::Revoked.auto_upgrade! 
 RubyCA::Core::Models::CRL.auto_upgrade! 
 
 require 'core/ca/setup'
