@@ -9,6 +9,8 @@ core/web/public/tmp
 private
 config.yaml
 thin.yaml
+.rbenv-gemsets
+.ruby-version
 
 .DS_Store
 ._*

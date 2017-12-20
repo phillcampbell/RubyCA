@@ -2,24 +2,25 @@ if __FILE__ == $0 then abort 'This file forms part of RubyCA and is not designed
 
 module RubyCA
   module Core
-    class Privileges
-      
+    class Privileges   
       def self.drop
-        # Drop privileges
-        puts ''
-        puts 'Dropping privileges...'
-        Process::Sys.setuid(Etc.getpwnam(CONFIG['privileges']['user']).uid)
-        # Check RubyCA has drops its privileges successfully
-        begin
-          Process::Sys.setuid(0)
-        rescue Errno::EPERM
-          puts "Successfully dropped privileges. RubyCA is now '#{Etc.getpwuid(Process.euid).name}'"
-        else
-          puts 'Error: Failed to drop privileges, RubyCA will now exit.'
-          abort
+        puts CONFIG['privileges']
+        if CONFIG['privileges'] && CONFIG['privileges']['user']
+          # Drop privileges
+          puts ''
+          puts 'Dropping privileges...'
+          Process::Sys.setuid(Etc.getpwnam(CONFIG['privileges']['user']).uid)
+          # Check RubyCA has drops its privileges successfully
+          begin
+            Process::Sys.setuid(0)
+          rescue Errno::EPERM
+            puts "Successfully dropped privileges. RubyCA is now '#{Etc.getpwuid(Process.euid).name}'"
+          else
+            puts 'Error: Failed to drop privileges. Exit now.'
+            abort
+          end
         end
       end
-      
     end
   end
 end

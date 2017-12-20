@@ -131,7 +131,6 @@ module RubyCA
         
         post '/admin/config' do         
           cfg_file = $root_dir + '/config.yaml'
-          puts params
           if File.writable?(cfg_file)
             
             #Simple User and password auth
@@ -213,17 +212,49 @@ module RubyCA
         end
         
         post '/admin/crl/config' do
-          #Add
-          if params[:ca][:crl][:dist][:add_uri] == '1'
-            puts "add"
-            puts params
+          cfg_file = $root_dir + '/config.yaml'
+
+          if File.writable?(cfg_file)
+            
+            #Add
+            if params[:ca][:crl][:dist][:add_uri] == '1'
+              CONFIG['ca']['crl']['dist']['uri'] ||={}
+              
+              if (params[:ca][:crl][:dist][:uri]==="")
+                flash.next[:danger] = "URI is empty."
+              else
+                unless CONFIG['ca']['crl']['dist']['uri'].include? params[:ca][:crl][:dist][:uri]
+                  CONFIG['ca']['crl']['dist']['uri'].push(params[:ca][:crl][:dist][:uri])
+                  File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                  CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                  flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> added to crl distribution points list."
+                else
+                  flash.next[:warning] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> is already in crl distribution points list."
+                end
+              end
+            end
+          
+            #Remove
+            if params[:ca][:crl][:dist][:rm_uri] == '1'
+              puts params
+              unless (params[:ca][:crl][:dist][:uri].nil? || params[:ca][:crl][:dist][:uri]==="" )
+                CONFIG['ca']['crl']['dist']['uri'] ||={}
+                params[:ca][:crl][:dist][:uri].each do |uri|
+                  CONFIG['ca']['crl']['dist']['uri'].delete("#{uri}")
+                end
+            
+                File.open(cfg_file, 'w') {|f| YAML.dump(CONFIG, f) } #Store
+                CONFIG = YAML.load(File.read(cfg_file)) # Reload
+                flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> deleted from crl distribution points list."
+              else
+                flash.next[:warning] = "Select the crl distribution point do you want delete."
+              end
+            end
+            
+          else
+            flash.next[:danger] = "#{cfg_file} is not writable. Fix it before set anything here."
           end
           
-          #Remove
-          if params[:ca][:crl][:dist][:rm_uri] == '1'
-            puts "remove"
-            puts params
-          end
           redirect '/admin/crl'
         end
         

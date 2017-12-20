@@ -3,6 +3,8 @@
 ## About
 RubyCA is a simple certificate authority manager written in Ruby.
 
+Forked from https://github.com/phillcampbell/RubyCA.git
+
 It is designed for internal use as an alternative to using self signed certificates. Install and trust the root certificate in your clients and any certificates you create will just work, no more browser warnings.
 
 ## Development
@@ -20,7 +22,7 @@ Pull requests welcome.
 
 Clone and enter the repository
 
-    $ git clone https://github.com/phillcampbell/RubyCA.git
+    $ git clone https://github.com/oferreiro/RubyCA.git
     $ cd RubyCA
 
 Use bundle to install dependencies
@@ -42,17 +44,40 @@ Visit http://<host>:<port>/admin to manage certificates
 
 To be able to be run RubyCA as daemon
 
+####Using puma:
+
+    $ cp ./distrib/puma/puma-sample.rb ./puma.rb
+    nano ./puma.rb
+
+RubyCA must be started with:
+
+    $ bundle exec thin puma -C ./puma.rb    
+
+####Using Thin:
+
 Create the thin.yaml file and edit to suit your requirements.
 
-    $ cp ./thin.yaml.sample ./thin.yaml
+    $ cp ./distrib/thin/thin.yaml.sample ./thin.yaml
     $ nano ./thin.yaml
-    
+
+Edit Gemfile to use thin server:
+
+    gem 'thin', '~> 1.7', '>= 1.7.2'
+    #gem 'puma', '~> 3.11'
+
+Run bundle:
+
+    $ bundle
+  
 RubyCA must be started with:
 
     $ bundle exec thin start -C ./thin.yaml
 
 Note:
-
 The first run still needs RubyCA run as root to be able generate the ca certificates.
-    
+  
     $ sudo ./RubyCA
+
+Or run in unsafe mode (-u|--unsafe) if you want keep user privileges on root ca private key.
+
+    $./RubyCA --unsafe

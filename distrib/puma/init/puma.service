@@ -1,0 +1,12 @@
+[Unit]
+Description=RubyCA Puma Server
+
+[Service]
+Type=simple
+User=appuser
+WorkingDirectory=/path/to/my/app/current
+ExecStart=/path/to/my/app/current/bin/bundle exec puma -e production -C ./config/puma.rb config.ru
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
