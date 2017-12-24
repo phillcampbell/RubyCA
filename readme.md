@@ -42,7 +42,7 @@ Visit http://<host>:<port>/admin to manage certificates
 ## Tips
 To be able to be run RubyCA as daemon
 
-### Using puma:
+### Using Puma:
 
     $ cp ./distrib/puma/puma-sample.rb ./config/puma.rb
     nano ./config/puma.rb

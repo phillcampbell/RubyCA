@@ -10,6 +10,7 @@ private
 config/rubyca.yaml
 config/thin.yaml
 config/puma.rb
+config/rubyca-puma.service
 .rbenv-gemsets
 .ruby-version
 

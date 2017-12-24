@@ -4,7 +4,7 @@ web:
   interface: 'localhost' # The interface to bind the web server to, use '0.0.0.0' for all interfaces
   port: 8083 # The port the web server will run on
   admin: 
-    allowed_ips: [ '192.168.0.1', '127.0.0.1' ] # Comma separated list of IP addresses that are allowed to access the web admin
+    allowed_ips: [ '127.0.0.1', '::1' ] # Comma separated list of IP addresses that are allowed to access the web admin
     auth:
       enable: false # true require setup user and password on http://<server>:<port>/admin/setup. 
                     # false permit only allowed_ips without  authentication pass.
@@ -36,7 +36,7 @@ ca:
       uri:
        #- 'http://www.example.com/ca.crl' # e.g.
 
-#used only for RubyCA module
+# used only for RubyCA module
 privileges:
 #  user: user
 #  group: group

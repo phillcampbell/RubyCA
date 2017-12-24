@@ -1,0 +1,13 @@
+%h2 Download
+%p Use the link below to download.
+.container
+%p
+  - if @download_url
+    %a.btn.btn-primary{id: "download", href: "#{@download_url}"}
+      %i.fa.fa-download
+      %span.hidden-sm-down Download
+  - else
+    %p Nothing to Download.
+    %a.btn.btn-info{ :href => "/"}
+      %i.fa.fa-download
+      %span.hidden-sm-down Home

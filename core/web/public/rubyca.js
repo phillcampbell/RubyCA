@@ -31,6 +31,13 @@ jQuery( document ).ready(function( $ ) {
     $('#infomodal').modal();
   };
   
+  $('a#download').click(function(){
+    setTimeout(function() {
+      window.location.replace("/admin/certificates");
+      }, 700);
+  });
+  
+  
   // trigger to create modal
   $('[data-get="modal"]').click( function(e) {
     e.preventDefault();

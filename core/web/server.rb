@@ -36,15 +36,14 @@ module RubyCA
         }
         
         helpers do          
-          def hosts_allowed?
+          def host_allowed?(addr)
             allowed = false
-            remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
-            remote_ip = IPAddress remote_addr
+            ip_addr = IPAddress addr
             
             CONFIG['web']['admin']['allowed_ips'].each do |allowed_ip|
               allow = IPAddress allowed_ip
-              if (remote_ip.ipv4? && allow.ipv4?) || (remote_ip.ipv6? && allow.ipv6?)
-                if allow.include? remote_ip
+              if (ip_addr.ipv4? && allow.ipv4?) || (ip_addr.ipv6? && allow.ipv6?)
+                if allow.include? ip_addr
                   allowed = true
                   break
                 end
@@ -63,7 +62,7 @@ module RubyCA
               if permit_auth
                 response['WWW-Authenticate'] = %(Basic realm="Restricted Area")
               end
-              throw(:halt, [401, "Not authorized\n"])
+              throw(:halt, [401, "401 - Not authorized!\n"])
             end
           end
 
@@ -102,7 +101,8 @@ module RubyCA
         end
                   
         before '/admin*' do
-          unless hosts_allowed?
+          remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
+          unless host_allowed?(remote_addr)
             protected!
           end
         end
@@ -169,8 +169,8 @@ module RubyCA
               end
             
               unless ip.nil?          
-                unless CONFIG['web']['admin']['allowed_ips'].include? params[:authcfg][:ip]
-                    
+                #unless CONFIG['web']['admin']['allowed_ips'].include? params[:authcfg][:ip]
+                unless host_allowed?(params[:authcfg][:ip])
                   if ip.network?
                     CONFIG['web']['admin']['allowed_ips'].push("#{ip}/#{ip.prefix}")
                   else
@@ -216,7 +216,6 @@ module RubyCA
             #Add
             if params[:ca][:crl][:dist][:add_uri] == '1'
               CONFIG['ca']['crl']['dist']['uri'] ||={}
-              
               if (params[:ca][:crl][:dist][:uri]==="")
                 flash.next[:danger] = "URI is empty."
               else
@@ -233,7 +232,6 @@ module RubyCA
           
             #Remove
             if params[:ca][:crl][:dist][:rm_uri] == '1'
-              puts params
               unless (params[:ca][:crl][:dist][:uri].nil? || params[:ca][:crl][:dist][:uri]==="" )
                 CONFIG['ca']['crl']['dist']['uri'] ||={}
                 params[:ca][:crl][:dist][:uri].each do |uri|
@@ -525,8 +523,11 @@ module RubyCA
           else
             begin
               deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
-              content_type :pem
-              deckey.to_pem
+              session[:download_cont] = deckey.to_pem
+              session[:download_cont_type] = :pem
+              @download_url = "/admin/download/#{params[:cn]}.pem"
+              haml :download
+              
             rescue OpenSSL::PKey::RSAError
               flash.next[:danger] = "Incorrect certificate passphrase"
               redirect "/admin/certificates/decrypted/#{params[:cn]}.pem"
@@ -567,13 +568,32 @@ module RubyCA
             
             begin
               p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
-              content_type :p12
-              p12.to_der
+              
+              session[:download_cont] = p12.to_der
+              session[:download_cont_type] = :p12
+              @download_url = "/admin/download/#{params[:cn]}.p12"
+              haml :download
               
             rescue OpenSSL::PKCS12::PKCS12Error
               flash.next[:danger] = "Error in pkcs12 generate"
               redirect "/admin/certificates/#{params[:cn]}.p12"
             end
+          end
+        end
+        
+        get '/admin/download/:url' do
+          if session[:download_cont]
+            content = session.delete(:download_cont)
+            if session[:download_cont_type]
+              download_cont_type = session.delete(:download_cont_type)
+            else
+              download_cont_type = "application/octet-stream"
+            end
+            content_type download_cont_type
+            content
+          else
+            flash.next[:danger] = "Download content not found! Maybe session expired. Try again..."
+            redirect '/admin/certificates'
           end
         end
         
@@ -627,7 +647,7 @@ module RubyCA
         end
         
         not_found do
-          '404 - Not Found'
+          haml :not_found #'404 - Not Found'
         end
       	
         get '/admin/dh.pem' do
