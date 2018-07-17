@@ -7,8 +7,8 @@ log/*
 *-bak.*
 core/web/public/tmp
 private
-config/rubyca.yaml
-config/thin.yaml
+config/rubyca.yml
+config/thin.yml
 config/puma.rb
 config/rubyca-puma.service
 .rbenv-gemsets

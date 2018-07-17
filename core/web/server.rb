@@ -165,7 +165,7 @@ module RubyCA
               begin
                 ip = IPAddress params[:authcfg][:ip]              
               rescue  
-                flash.next[:danger] =  "Invalid network or ip address! <b>(#{params[:authcfg][:ip]})</b>"
+                flash.next[:danger] =  "Invalid network or ip address! <strong>(#{params[:authcfg][:ip]})</strong>"
               end
             
               unless ip.nil?          
@@ -179,9 +179,9 @@ module RubyCA
               
                   File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
                   CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
-                  flash.next[:success] = "<b>#{params[:authcfg][:ip]}</b> added to allowed ips."
+                  flash.next[:success] = "<strong>#{params[:authcfg][:ip]}</strong> added to allowed ips."
                 else
-                  flash.next[:warning] = "#{params[:authcfg][:ip]} is already in the allowed ips."
+                  flash.next[:warning] = "<strong>#{params[:authcfg][:ip]}</strong> is already allowed ip address."
                 end
               end
             end
@@ -196,10 +196,10 @@ module RubyCA
             
               File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
               CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
-              flash.next[:success] = "<b>#{params[:authcfg][:ips]}</b> deleted from allowed ips."
+              flash.next[:success] = "<strong>#{params[:authcfg][:ips]}</strong> deleted from allowed ips."
             end
           else
-            flash.next[:danger] = "#{CFG_FILE} is not writable. Fix it before set anything here."
+            flash.next[:danger] = "<strong>#{CFG_FILE}</strong> is not writable. Fix it before set anything here."
           end                    
           redirect '/admin/config'
         end
@@ -223,9 +223,9 @@ module RubyCA
                   CONFIG['ca']['crl']['dist']['uri'].push(params[:ca][:crl][:dist][:uri])
                   File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
                   CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
-                  flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> added to crl distribution points list."
+                  flash.next[:success] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> added to crl distribution points list."
                 else
-                  flash.next[:warning] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> is already in crl distribution points list."
+                  flash.next[:warning] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> is already in crl distribution points list."
                 end
               end
             end
@@ -240,7 +240,7 @@ module RubyCA
             
                 File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
                 CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
-                flash.next[:success] = "<b>#{params[:ca][:crl][:dist][:uri]}</b> deleted from crl distribution points list."
+                flash.next[:success] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> deleted from crl distribution points list."
               else
                 flash.next[:warning] = "Select the crl distribution point do you want delete."
               end
@@ -284,7 +284,7 @@ module RubyCA
                     
           crl_info = get_crl_info
           if !crl_info[:expired] && !crl_info[:to_expire]
-            flash.next[:danger] = "CRL is not expired or to expire. Renewal is not necessary."
+            flash.next[:danger] = "CRL is not expired or to expire. Renewal is not necessary now."
             redirect '/admin/crl'
           end
           
@@ -328,7 +328,7 @@ module RubyCA
             cn = params[:csr][:cn]
             session[:csr] = params[:csr]
             session[:csr][:cn] = nil
-            flash.next[:danger] = "A certificate signing request already exists for <strong>'Common Name: =#{cn}'</strong>"
+            flash.next[:danger] = "A certificate signing request already exists for <strong>'Common Name: #{cn}'</strong>"
             redirect '/admin/csrs'
           end
           
@@ -339,7 +339,7 @@ module RubyCA
               st: params[:csr][:st],
               c: params[:csr][:c] )
               
-          cipher = OpenSSL::Cipher::Cipher.new 'AES-256-CBC'
+          cipher = OpenSSL::Cipher.new 'AES-256-CBC'
           key = OpenSSL::PKey::RSA.new 2048
           @csr.pkey = key.export(cipher, params[:csr][:passphrase])
           csr = OpenSSL::X509::Request.new
@@ -349,7 +349,7 @@ module RubyCA
           csr.sign key, OpenSSL::Digest::SHA512.new
           @csr.csr = csr.to_pem
           @csr.save
-          flash.next[:success] = "Created certificate signing request for '#{@csr.cn}'"
+          flash.next[:success] = "Created certificate signing request for <strong>'#{@csr.cn}'</strong>"
           redirect '/admin/csrs'
         end
         
@@ -425,7 +425,7 @@ module RubyCA
           @serial.value = crt.serial.to_s
           @serial.save
           crt.version = 2
-          crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
+          crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, Time.now.hour, Time.now.min,Time.now.sec)
           crt.not_after = crt.not_before + (CONFIG['ca']['certificate']['default_expiration'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['certificate']['default_expiration'] / 4).to_int * 24 * 60 * 60)
           crt.subject = csr.subject
           crt.public_key = csr.public_key

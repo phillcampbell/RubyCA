@@ -19,7 +19,7 @@ jQuery( document ).ready(function( $ ) {
             // Body
             $("<div/>", {class: "modal-body"}).append(this),
             //Footer
-            $("<div/>", {class: "modal-footer"}).html('<button class="btn" data-dismiss="modal">Close</button>')                      
+            $("<div/>", {class: "modal-footer"}).html('<button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>')                      
           )
         )
       )
