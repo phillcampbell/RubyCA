@@ -15,18 +15,18 @@
           %td 
             = csr.o
           
-          %td.pull-right
-            %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST' }
+          %td.float-right
+            %form{ :action => "/admin/csrs/#{csr.cn}", :method => 'POST', :onsubmit => "return confirm('Are you sure you want to delete this request?')"  }
               .btn-group{role: "group" }
                 %a.btn.btn-sm.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
-                  %i.fa.fa-info-circle
+                  %i.fas.fa-info-circle
                   %span.hidden-sm-down Info
                 %a.btn.btn-primary.btn-sm{ href: "/admin/csrs/#{csr.cn}/sign" }
-                  %i.fa.fa-pencil
+                  %i.fas.fa-pen
                   %span.hidden-sm-down Sign
-                %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
+                %input{ type: 'hidden', name: '_method', value: 'DELETE'} 
                 %button.btn.btn-danger.btn-sm{ :type => 'submit' }
-                  %i.fa.fa-trash
+                  %i.fas.fa-trash
                   %span.hidden-sm-down Delete
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset.form-group

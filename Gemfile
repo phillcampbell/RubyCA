@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'sinatra', '~> 2.0'
+gem 'sinatra', '~> 2.0.3'
 gem 'sinatra-flash'
 gem 'haml'
 gem 'dm-sqlite-adapter'
@@ -9,12 +9,12 @@ gem 'dm-validations'
 gem 'ipaddress'
 
 # puma is default server now
-gem 'puma', '~> 3.11'
+gem 'puma', '~> 3.12'
 
 #gem 'thin', '~> 1.7', '>= 1.7.2'
 
 group :development do
-  gem 'sinatra-reloader'
+  gem 'sinatra-contrib'
 end
 
 group :test do

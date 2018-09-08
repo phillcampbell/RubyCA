@@ -4,14 +4,13 @@
     %meta{ charset: 'utf-8' }
     %meta{name: "viewport", content: "width=device-width", "initial-scale" => "1", "shrink-to-fit" => "no"}
     %title RubyCA
-    %link{ href: '/tether/css/tether.min.css', rel: 'stylesheet' }
+    %link{ href: '/fontawesome/css/all.min.css', rel: 'stylesheet' }
     %link{ href: '/bootstrap/css/bootstrap.min.css', rel: 'stylesheet' }
-    %link{ href: '/font-awesome/css/font-awesome.min.css', rel: 'stylesheet' }
     %link{ href: '/rubyca.css', rel: 'stylesheet' }
     
   %body
     %header
-      %nav.navbar.navbar-inverse.bg-inverse.navbar-toggleable-md.bg-faded
+      %nav.navbar.navbar-dark.bg-dark.navbar-expand-lg 
         .container
           %button.navbar-toggler.navbar-toggler-right{type: "button", "data-toggle"=>"collapse", "data-target" => "#rubyca-navbar", |
             "aria-controls" => "rubyca-navbar", "aria-expanded" => "false", "aria-label"=>"Toggle navigation"}
@@ -34,7 +33,7 @@
         =styled_flash
         = yield
         
-  %script{ src: '/jquery/jquery-3.1.1.min.js' }
-  %script{ src: '/tether/js/tether.min.js' }'
+  %script{ src: '/jquery/jquery-3.3.1.min.js' }
+  %script{ src: '/popper/popper.min.js' }'
   %script{ src: '/bootstrap/js/bootstrap.min.js' }'
   %script{ src: '/rubyca.js' }'

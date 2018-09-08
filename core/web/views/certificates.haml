@@ -9,14 +9,14 @@
       %tr
         %td
           = crt.cn
-        %td.pull-right
+        %td.float-right
           .btn-group
             %a.btn.btn-sm.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" }
-              %i.fa.fa-info-circle
+              %i.fas.fa-info-circle
               %span.hidden-sm-down Info
             .btn-group
               %a.btn.btn-sm.btn-primary.dropdown-toggle.bt-download{ :href => "#", "data-toggle" => "dropdown" } 
-                %i.fa.fa-download
+                %i.fas.fa-download
                 %span.hidden-sm-down Download
                 %span.caret
               .dropdown-menu.dropdown-menu-right
@@ -31,7 +31,7 @@
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12
             - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
               %a.btn.btn-danger.btn-sm{ :href => "/admin/certificates/#{crt.cn}/revoke" }
-                %i.fa.fa-remove
+                %i.fas.fa-remove
                 %span.hidden-sm-down Revoke
                 
 -if !@revokeds.empty?
@@ -46,10 +46,10 @@
         %tr
           %td 
             = crt.cn
-          %td.pull-right
+          %td.float-right
             .btn-group
-              %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST' }
+              %form{ :action => "/admin/revokeds/#{crt.id}", :method => 'POST', :onsubmit => "return confirm('Are you sure you want to delete this revoked certificate?')"}
                 %input{ type: 'hidden', name: '_method', value: 'DELETE' } 
                 %button.btn.btn-danger.btn-sm{ :type => 'submit' }
-                  %i.fa.fa-trash
+                  %i.fas.fa-trash
                   %span.hidden-sm-down Delete

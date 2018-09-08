@@ -16,17 +16,17 @@
           = @crl_info[:last_update].strftime("%d/%m/%y %H:%M:%S")
         %td
           = @crl_info[:next_update].strftime("%d/%m/%y %H:%M:%S")  
-        %td.pull-right
+        %td.float-right
           .btn-group
             %a.btn.btn-sm.btn-info{ href: "/admin/crl/info", "data-get"=>"modal",  "data-title" => "CRL Info"}
-              %i.fa.fa-info-circle
+              %i.fas.fa-info-circle
               %span.hidden-sm-down Info
             %a.btn.btn-sm.btn-primary{ :href => "/ca.crl"}
-              %i.fa.fa-download
+              %i.fas.fa-download
               %span.hidden-sm-down Download 
             - if @crl_info[:expired] || @crl_info[:to_expire]
               %a.btn.btn-sm.btn-warning{ :href => "/admin/crl/renew"}
-                %i.fa.fa-refresh
+                %i.fas.fa-refresh
                 %span.hidden-sm-down Renew
 .row
   %legend Config

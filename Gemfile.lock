@@ -1,9 +1,15 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    activesupport (5.2.0)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
+      minitest (~> 5.1)
+      tzinfo (~> 1.1)
     addressable (2.5.2)
       public_suffix (>= 2.0.2, < 4.0)
-    backports (3.10.3)
+    backports (3.11.3)
+    concurrent-ruby (1.0.5)
     data_objects (0.10.17)
       addressable (~> 2.1)
     dm-core (1.2.1)
@@ -23,33 +29,38 @@ GEM
     haml (5.0.4)
       temple (>= 0.8.0)
       tilt
+    i18n (1.0.1)
+      concurrent-ruby (~> 1.0)
     ipaddress (0.8.3)
-    multi_json (1.12.2)
-    mustermann (1.0.1)
+    minitest (5.11.3)
+    multi_json (1.13.1)
+    mustermann (1.0.2)
     public_suffix (3.0.1)
-    puma (3.11.0)
-    rack (2.0.3)
-    rack-protection (2.0.0)
+    puma (3.12.0)
+    rack (2.0.5)
+    rack-protection (2.0.3)
       rack
     rake (12.3.0)
-    sinatra (2.0.0)
+    sinatra (2.0.3)
       mustermann (~> 1.0)
       rack (~> 2.0)
-      rack-protection (= 2.0.0)
+      rack-protection (= 2.0.3)
       tilt (~> 2.0)
-    sinatra-contrib (2.0.0)
-      backports (>= 2.0)
+    sinatra-contrib (2.0.3)
+      activesupport (>= 4.0.0)
+      backports (>= 2.8.2)
       multi_json
       mustermann (~> 1.0)
-      rack-protection (= 2.0.0)
-      sinatra (= 2.0.0)
+      rack-protection (= 2.0.3)
+      sinatra (= 2.0.3)
       tilt (>= 1.3, < 3)
     sinatra-flash (0.3.0)
       sinatra (>= 1.0.0)
-    sinatra-reloader (1.0)
-      sinatra-contrib
     temple (0.8.0)
+    thread_safe (0.3.6)
     tilt (2.0.8)
+    tzinfo (1.2.5)
+      thread_safe (~> 0.1)
 
 PLATFORMS
   ruby
@@ -60,11 +71,11 @@ DEPENDENCIES
   dm-validations
   haml
   ipaddress
-  puma (~> 3.11)
+  puma (~> 3.12)
   rake (>= 0.9.6)
-  sinatra (~> 2.0)
+  sinatra (~> 2.0.3)
+  sinatra-contrib
   sinatra-flash
-  sinatra-reloader
 
 BUNDLED WITH
    1.16.0

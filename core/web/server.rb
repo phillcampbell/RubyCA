@@ -592,7 +592,7 @@ module RubyCA
             content_type download_cont_type
             content
           else
-            flash.next[:danger] = "Download content not found! Maybe session expired. Try again..."
+            flash.next[:danger] = "Session expired. Download content not found! Try again..."
             redirect '/admin/certificates'
           end
         end
@@ -654,7 +654,7 @@ module RubyCA
           # ATTENTION
           # Be carefull. This is a experimental issue.
           # DH generation is very slow
-          # Needs implementation of generate and save on db
+          # Needs implementation of generate and save it on db
           
           dh = OpenSSL::PKey::DH.new(2048)
           content_type :pem
