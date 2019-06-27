@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# script to auto renew crl
+# replace your intermediate passord and server address
+# put it in cron
+# It is important keep this file safe
+# Eg:
+# chown root.root /etc/cron.daily/dacheck_crl
+# chmod 700 /etc/cron.daily/dacheck_crl
+#   
+# Variables
+SERVER_URL="http://localhost:8083"
+CRL_URL="${SERVER_URL}/ca.crl"
+RENEW_URL="${SERVER_URL}/admin/crl/renew"
+RENEW_BEFORE_EXP="4 days" #time to renew crl before expire
+INT_POST_PARM="passphrase[intermediate]=YourIntermediatePassword"
+
+#
+EXP_DATE=$(wget "${CRL_URL}" -O - 2>/dev/null | openssl crl -inform DER -noout -nextupdate | awk -F= '{print $2}' | xargs -I{} date -d {} +%s)
+
+if [ ${EXP_DATE} -lt $(date -d "${RENEW_BEFORE_EXP}" +%s) ]; then
+  echo "CRL is expired or it will expires soon."
+  echo "Renew now."
+  echo
+  wget --post-data="${INT_POST_PARM}" ${RENEW_URL} -O -
+fi
