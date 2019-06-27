@@ -1,12 +1,12 @@
 #!/bin/bash
 
 # script to auto renew crl
-# replace your intermediate passord and server address
+# replace your intermediate password and server address
 # put it in cron
 # It is important keep this file safe
 # Eg:
-# chown root.root /etc/cron.daily/dacheck_crl
-# chmod 700 /etc/cron.daily/dacheck_crl
+# chown root.root /etc/cron.daily/check_crl
+# chmod 700 /etc/cron.daily/check_crl
 #   
 # Variables
 SERVER_URL="http://localhost:8083"
