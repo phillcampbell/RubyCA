@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# script to auto renew crl
+# replace your intermediate password and server address
+# put it in cron
+# It is important keep this file safe
+# Eg:
+# chown root.root /etc/cron.daily/rubyca-check-crl
+# chmod 700 /etc/cron.daily/rubyca-check-crl
+#
+
+# Aux. function(s)
+
+urlencode() {
+    # urlencode <string>
+    old_lc_collate=$LC_COLLATE
+    LC_COLLATE=C
+
+    local length="${#1}"
+    for (( i = 0; i < length; i++ )); do
+        local c="${1:i:1}"
+        case $c in
+            [a-zA-Z0-9.~_-]) printf "$c" ;;
+            *) printf '%%%02X' "'$c" ;;
+        esac
+    done
+
+    LC_COLLATE=$old_lc_collate
+} # From https://gist.github.com/cdown/1163649
+
+
+# Variables
+SERVER_URL="http://localhost:8083"
+RENEW_BEFORE_EXP="4 days" #time to renew crl before expire
+INT_PASS="YourIntermediatePassword"
+
+#
+CRL_URL="${SERVER_URL}/ca.crl"
+RENEW_URL="${SERVER_URL}/admin/crl/renew"
+EXP_DATE=$(wget "${CRL_URL}" -O - 2>/dev/null | openssl crl -inform DER -noout -nextupdate | awk -F= '{print $2}' | xargs -I{} date -d {} +%s)
+INT_POST_PARM="passphrase[intermediate]=$(urlencode ${INT_PASS})"
+
+if [ ${EXP_DATE} -lt $(date -d "${RENEW_BEFORE_EXP}" +%s) ]; then
+  echo "CRL is expired or it will expires soon."
+  echo "Renew now."
+  echo
+  wget --post-data="${INT_POST_PARM}" ${RENEW_URL} -O -
+fi
