@@ -20,14 +20,14 @@
               .btn-group{role: "group" }
                 %a.btn.btn-sm.btn-info{ href: "/admin/csrs/#{csr.cn}/info" , "data-get" => "modal",  "data-title" => "CSR Info" }
                   %i.fas.fa-info-circle
-                  %span.hidden-sm-down Info
+                  %span.d-none.d-md-inline Info
                 %a.btn.btn-primary.btn-sm{ href: "/admin/csrs/#{csr.cn}/sign" }
                   %i.fas.fa-pen
-                  %span.hidden-sm-down Sign
+                  %span.d-none.d-md-inline Sign
                 %input{ type: 'hidden', name: '_method', value: 'DELETE'} 
                 %button.btn.btn-danger.btn-sm{ :type => 'submit' }
                   %i.fas.fa-trash
-                  %span.hidden-sm-down Delete
+                  %span.d-none.d-md-inline Delete
 %form#csr.form-horizontal{ action: '/admin/csrs', method: 'post' }
   %fieldset.form-group
     %legend Create CSR

@@ -5,9 +5,9 @@
   - if @download_url
     %a.btn.btn-primary{id: "download", href: "#{@download_url}"}
       %i.fas.fa-download
-      %span.hidden-sm-down Download
+      %span.d-none.d-md-inline Download
   - else
     %p Nothing to Download.
     %a.btn.btn-info{ :href => "/"}
       %i.fas.fa-download
-      %span.hidden-sm-down Home
+      %span.d-none.d-md-inline Home

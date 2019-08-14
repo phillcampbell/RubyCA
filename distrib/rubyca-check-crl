@@ -32,7 +32,7 @@ urlencode() {
 # Variables
 SERVER_URL="http://localhost:8083"
 RENEW_BEFORE_EXP="4 days" #time to renew crl before expire
-INT_PASS="YourIntermediatePassword"
+INT_PASS='YourIntermediatePassword'
 
 #
 CRL_URL="${SERVER_URL}/ca.crl"

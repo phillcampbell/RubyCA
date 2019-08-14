@@ -116,6 +116,12 @@ module RubyCA
           content_type :crl
           @crl.to_der
         end
+        
+        get '/crl.pem' do
+          @crl = OpenSSL::X509::CRL.new RubyCA::Core::Models::CRL.last.crl
+          content_type :crl
+          @crl.to_pem
+        end
                   
         get '/admin/?' do
           haml :admin
