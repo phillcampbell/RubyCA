@@ -9,7 +9,7 @@ gem 'dm-validations'
 gem 'ipaddress'
 
 # puma is default server now
-gem 'puma', '~> 4.0', '>= 4.0.1'
+gem 'puma', '~> 4.1'
 
 #gem 'thin', '~> 1.7', '>= 1.7.2'
 
