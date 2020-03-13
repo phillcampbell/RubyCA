@@ -19,6 +19,7 @@
           .form-check
             %label.form-check-label{ for: "enable" }
             %input.form-check-input#enable{ type: 'checkbox', name: 'authcfg[enable]', value: 1, checked: @authcfg.nil? ? false : @authcfg["enable"] } Enable authentication for not allowed IPs
+        .form-group
           %button.btn.btn-primary{ type: 'submit' } Set
 
   .col-md-6.col-xs-12

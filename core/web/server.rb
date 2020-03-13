@@ -286,14 +286,13 @@ module RubyCA
             flash.next[:danger] = "Incorrect intermediate CA key passphrase"
             redirect "/admin/crl/renew"
           end
-          intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt 
-                    
+          
           crl_info = get_crl_info
           if !crl_info[:expired] && !crl_info[:to_expire]
             flash.next[:danger] = "CRL is not expired or to expire. Renewal is not necessary now."
             redirect '/admin/crl'
           end
-          
+          intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt 
           crl_rec = RubyCA::Core::Models::CRL.last
           crl = OpenSSL::X509::CRL.new crl_rec.crl
           
@@ -306,6 +305,49 @@ module RubyCA
           flash.next[:success] = "CRL successfully renewed"
           redirect '/admin/crl'
         end
+        
+        post '/admin/crl/renew.txt' do
+          content_buffer = " "
+          content_buffer += "---------------------------------------------------------------\n"
+          content_buffer += " RubyCA - Renew CRL\n\n"
+          content_buffer += "---------------------------------------------------------------\n"
+          intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          validpw = true
+          begin
+            intermediate_key = OpenSSL::PKey::RSA.new intermediate.pkey, params[:passphrase][:intermediate]
+          rescue OpenSSL::PKey::RSAError
+            session[:sign] = params
+            validpw = false
+            content_buffer += "Incorrect intermediate CA key passphrase\n"
+          end
+          if validpw
+            crl_info = get_crl_info
+            if !crl_info[:expired] && !crl_info[:to_expire]
+              content_buffer += "CRL is not expired or to expire. Renewal is not necessary now.\n"
+            else
+
+              intermediate_crt = OpenSSL::X509::Certificate.new intermediate.crt
+              crl_rec = RubyCA::Core::Models::CRL.last
+              crl = OpenSSL::X509::CRL.new crl_rec.crl
+        
+              crl.last_update = Time.now
+              crl.next_update = Time.now + 30 * 24 * 60 * 60
+              crl.sign intermediate_key, OpenSSL::Digest::SHA512.new
+              intermediate_key = nil
+              crl_rec.crl = crl.to_pem
+              crl_rec.save
+        
+              content_buffer += "CRL successfully renewed.\n\n"
+        
+              crl_rec = RubyCA::Core::Models::CRL.last
+              crl = OpenSSL::X509::CRL.new crl_rec.crl
+              content_buffer += crl.to_text
+            end
+          end
+          content_type :txt
+          content_buffer
+        end
+        
         
         get '/admin/csrs/:cn/info' do
           csr_rec = RubyCA::Core::Models::CSR.get(params[:cn])
@@ -378,7 +420,7 @@ module RubyCA
         
         get '/admin/csrs/:cn/sign/?' do     
           if RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-            flash.next[:danger] = "A certificate already exists for '#{params[:cn]}', revoke the old certificate before signing this request"
+            flash.next[:danger] = "A certificate already exists for '#{params[:cn]}', revoke  and delete the old certificate before signing this request"
             redirect '/admin/csrs'
           end
           
@@ -650,6 +692,11 @@ module RubyCA
           @revokedcert.destroy
           flash.next[:success] = "Removed revoked certificate for '#{@revokedcert.id}: #{@revokedcert.cn}'"
           redirect '/admin/certificates'
+        end
+        
+        get '/admin/ovpn/server.conf' do          
+          content_type :txt          
+          haml :'ovpn/server_templ', layout: false
         end
         
         not_found do

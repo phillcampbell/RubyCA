@@ -36,7 +36,7 @@ INT_PASS='YourIntermediatePassword'
 
 #
 CRL_URL="${SERVER_URL}/ca.crl"
-RENEW_URL="${SERVER_URL}/admin/crl/renew"
+RENEW_URL="${SERVER_URL}/admin/crl/renew.txt"
 EXP_DATE=$(wget "${CRL_URL}" -O - 2>/dev/null | openssl crl -inform DER -noout -nextupdate | awk -F= '{print $2}' | xargs -I{} date -d {} +%s)
 INT_POST_PARM="passphrase[intermediate]=$(urlencode ${INT_PASS})"
 
