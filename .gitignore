@@ -13,6 +13,7 @@ config/puma.rb
 config/rubyca-puma.service
 .rbenv-gemsets
 .ruby-version
+Gemfile.lock
 
 .DS_Store
 ._*

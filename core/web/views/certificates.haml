@@ -25,10 +25,16 @@
                 - unless crt.cn === CONFIG['ca']['root']['cn']               
                   %a.dropdown-item{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key
-          
+                
                 - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
                   %a.dropdown-item{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12
+            
+            - unless crt.cn === CONFIG['ca']['root']['cn']
+              %a.btn.btn-secondary.btn-sm{ href: "/admin/certificates/#{crt.cn}/chpwd" }
+                %i.fas.fa-key
+                %span.d-none.d-md-inline Password
+            
             - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
               %a.btn.btn-danger.btn-sm{ :href => "/admin/certificates/#{crt.cn}/revoke" }
                 %i.fas.fa-times

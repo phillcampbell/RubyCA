@@ -645,7 +645,51 @@ module RubyCA
           end
         end
         
-        get '/admin/certificates/:cn/revoke/?' do
+        get '/admin/certificates/:cn/chpwd?' do
+          @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
+          if @crt.cn === CONFIG['ca']['root']['cn']
+            flash.next[:danger] = "Cannot change the root password"
+            redirect '/admin/certificates'
+          end
+          haml :chpwd
+        end
+        
+        post '/admin/certificates/:cn/chpwd' do
+          currpw = params[:passphrase][:current]
+          newpw = params[:passphrase][:new]
+          confirmpw = params[:passphrase][:confirm]
+          
+          if currpw.nil? || newpw.nil? || confirmpw.nil? || currpw.empty? || newpw.empty? || confirmpw.empty?
+            flash.next[:danger] = "Current Password, new password and confirm password can't be empty."
+            redirect "/admin/certificates/#{params[:cn]}/chpwd"
+          end
+            
+          unless newpw == confirmpw
+            flash.next[:danger] = "Password and confirm password does not match."
+            redirect "/admin/certificates/#{params[:cn]}/chpwd"      
+          end
+                      
+          @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
+          if @crt.cn === CONFIG['ca']['root']['cn']
+            flash.next[:danger] = "Root private key password change are disabled."
+            redirect '/admin/certificates'
+          else
+            begin
+              deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:current]              
+            rescue OpenSSL::PKey::RSAError
+              flash.next[:danger] = "Incorrect key passphrase"
+              redirect "/admin/certificates/#{params[:cn]}/chpwd"
+            end
+            
+            cipher = OpenSSL::Cipher.new 'AES-256-CBC'
+            @crt.pkey = deckey.export(cipher, newpw)
+            @crt.save
+            flash.next[:success] = "Key password changed for '#{@crt.cn}'"
+            redirect '/admin/certificates'
+          end
+        end
+        
+        get '/admin/certificates/:cn/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
             flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
