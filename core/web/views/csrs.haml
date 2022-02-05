@@ -52,6 +52,11 @@
         .form-group
           %label{ for: 'passphrase' } Key Passphrase
           %input.form-control#passphrase{ name: 'csr[passphrase]', type: 'password', placeholder: '' }
+        .form-group
+          %label{ for: 'confirm' } Confirm Passphrase
+          %input.form-control#passphrase{ name: 'csr[confirm]', type: 'password', placeholder: '' }
+        
+        
     .form-group
       %button.btn.btn-primary{ type: 'submit' } Create New
       - if !@csr.nil?

@@ -372,6 +372,12 @@ module RubyCA
             end  
           end
           
+          if params[:csr][:passphrase] != params[:csr][:confirm]
+            session[:csr] = params[:csr]
+            flash.next[:danger] = "Passphrase and confirm does not matches"
+            redirect '/admin/csrs'
+          end
+          
           if RubyCA::Core::Models::CSR.get(params[:csr][:cn])
             cn = params[:csr][:cn]
             session[:csr] = params[:csr]
@@ -660,7 +666,7 @@ module RubyCA
           confirmpw = params[:passphrase][:confirm]
           
           if currpw.nil? || newpw.nil? || confirmpw.nil? || currpw.empty? || newpw.empty? || confirmpw.empty?
-            flash.next[:danger] = "Current Password, new password and confirm password can't be empty."
+            flash.next[:danger] = "Current password, new password and confirm password can't be empty."
             redirect "/admin/certificates/#{params[:cn]}/chpwd"
           end
             
@@ -689,7 +695,7 @@ module RubyCA
           end
         end
         
-        get '/admin/certificates/:cn/?' do
+        get '/admin/certificates/:cn/revoke/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
             flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
