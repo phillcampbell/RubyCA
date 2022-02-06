@@ -398,7 +398,7 @@ module RubyCA
           @csr.pkey = key.export(cipher, params[:csr][:passphrase])
           csr = OpenSSL::X509::Request.new
           csr.version = 2
-          csr.subject = OpenSSL::X509::Name.parse "C=#{@csr.c}/ST=#{@csr.st}/L=#{@csr.l}/O=#{@csr.o}/CN=#{@csr.cn}"
+          csr.subject = OpenSSL::X509::Name.parse "/C=#{@csr.c}/ST=#{@csr.st}/L=#{@csr.l}/O=#{@csr.o}/CN=#{@csr.cn}"
           csr.public_key = key.public_key
           csr.sign key, OpenSSL::Digest::SHA512.new
           @csr.csr = csr.to_pem

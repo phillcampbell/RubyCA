@@ -26,7 +26,7 @@ def gen_self_signed_root(cipher)
     io.write root_key.export(cipher)
   end
   # Create root certificate
-  root_name = OpenSSL::X509::Name.parse "C=#{CONFIG['ca']['root']['country']}/ST=#{CONFIG['ca']['root']['state']}/L=#{CONFIG['ca']['root']['locality']}/O=#{CONFIG['ca']['root']['organisation']}/CN=#{CONFIG['ca']['root']['cn']}"
+  root_name = OpenSSL::X509::Name.parse "/C=#{CONFIG['ca']['root']['country']}/ST=#{CONFIG['ca']['root']['state']}/L=#{CONFIG['ca']['root']['locality']}/O=#{CONFIG['ca']['root']['organisation']}/CN=#{CONFIG['ca']['root']['cn']}"
   root_crt = OpenSSL::X509::Certificate.new
   root_crt.serial = 0x10000000000000000000000000000000 + rand(0x01000000000000000000000000000000)
   RubyCA::Core::Models::Config.create( name: 'last_serial', value: root_crt.serial.to_s )
@@ -63,7 +63,7 @@ def gen_intermediate(root_key, root_crt, cipher)
   # Generate intermediate csr
   intermediate_csr = OpenSSL::X509::Request.new
   intermediate_csr.version = 2
-  intermediate_csr.subject = OpenSSL::X509::Name.parse "C=#{CONFIG['ca']['intermediate']['country']}/ST=#{CONFIG['ca']['intermediate']['state']}/L=#{CONFIG['ca']['intermediate']['locality']}/O=#{CONFIG['ca']['intermediate']['organisation']}/CN=#{CONFIG['ca']['intermediate']['cn']}"
+  intermediate_csr.subject = OpenSSL::X509::Name.parse "/C=#{CONFIG['ca']['intermediate']['country']}/ST=#{CONFIG['ca']['intermediate']['state']}/L=#{CONFIG['ca']['intermediate']['locality']}/O=#{CONFIG['ca']['intermediate']['organisation']}/CN=#{CONFIG['ca']['intermediate']['cn']}"
   intermediate_csr.public_key = intermediate_key.public_key
   intermediate_csr.sign intermediate_key, OpenSSL::Digest::SHA512.new
   
