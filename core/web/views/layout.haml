@@ -30,8 +30,8 @@
                 %a.nav-link{ href: '/admin/config' } Settings
     %section
       .container
-        =styled_flash
-        = yield
+        != styled_flash
+        != yield
 
   %script{ src: '/jquery/jquery-3.4.1.min.js' }
   %script{ src: '/popper/popper.min.js' }'
