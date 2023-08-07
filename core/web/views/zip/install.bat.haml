@@ -1,0 +1,6 @@
+:plain
+  @ECHO OFF
+  SET ThisScriptsDirectory=%~dp0
+  SET PowerShellScriptPath=%ThisScriptsDirectory%vpn_cert_tool.ps1
+  PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '%PowerShellScriptPath%' 'Install'";
+  @pause

@@ -1,0 +1,124 @@
+:plain
+  Function Check-RunAsAdministrator()
+  {
+      #Get current user context
+      $CurrentUser = New-Object Security.Principal.WindowsPrincipal $([Security.Principal.WindowsIdentity]::GetCurrent())
+    
+      #Check user is running the script is member of Administrator Group
+      if($CurrentUser.IsInRole([Security.Principal.WindowsBuiltinRole]::Administrator))
+      {
+          Write-host "Script is running with Administrator privileges!"
+      }
+      else{
+          #Create a new Elevated process to Start PowerShell
+          $ElevatedProcess = New-Object System.Diagnostics.ProcessStartInfo "PowerShell";
+
+          # Specify the current script path and name as a parameter
+          $ElevatedProcess.Arguments = "& '" + $script:MyInvocation.MyCommand.Path + "'"
+
+          #Set the Process to elevated
+          $ElevatedProcess.Verb = "runas"
+
+          #Start the new elevated process
+          [System.Diagnostics.Process]::Start($ElevatedProcess)
+
+          #Exit from the current, unelevated, process
+          Exit 
+      }
+  }
+  
+  $vpn_if_name = "#{vpn_if_name}"
+  $vpn_server_addr = "#{vpn_server_addr}"
+  $epw = "#{epw}"
+  $cn = "#{cn}"
+  $icn = "#{icn}"
+  $rcn = "#{rcn}"
+  
+  #Check Script is running with Elevated Privileges
+  Check-RunAsAdministrator
+
+  switch ($args[0]) {
+      "Install" {
+          $certFile = $($PSScriptRoot) + "\" + $cn + ".p12"
+          Write-Host "Importing $($certFile)..."
+          $ppw = [System.Text.Encoding]::UTF8.GetString([System.Convert]::FromBase64String($epw))
+
+          $flags = [System.Security.Cryptography.X509Certificates.X509KeyStorageFlags] "MachineKeySet,PersistKeySet,Exportable"
+          $Collection = New-Object System.Security.Cryptography.X509Certificates.X509Certificate2Collection
+          $Collection.Import($certFile, $ppw, $flags)
+          <#
+          for ($i = 0; $i -lt $Collection.count; $i++){
+              Write-Host "-----------------------------------------------------------------"
+              Write-Host $Collection[$i]
+              Write-Host "-----------------------------------------------------------------"
+          }
+          #>
+          $root_store = Get-item Cert:\LocalMachine\Root
+          $root_store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+          $root_store.AddRange([Security.Cryptography.X509Certificates.X509Certificate2Collection]::new($Collection[1]))
+
+          $interm_store = Get-item Cert:\LocalMachine\CA
+          $interm_store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+          $interm_store.AddRange([Security.Cryptography.X509Certificates.X509Certificate2Collection]::new($Collection[0]))
+
+          $store = Get-Item cert:\LocalMachine\My\
+          $store.Open([Security.Cryptography.X509Certificates.OpenFlags]::ReadWrite)
+          $store.AddRange([Security.Cryptography.X509Certificates.X509Certificate2Collection]::new($Collection[2]))
+
+          Write-Host "Creating VPN connection"
+
+          Add-VpnConnection -Name $vpn_if_name -ServerAddress $vpn_server_addr -TunnelType ikev2 -AuthenticationMethod MachineCertificate -SplitTun
+
+          $vpn = Get-VpnConnection -Name $vpn_if_name;
+          if($vpn.ConnectionStatus -eq "Disconnected"){
+              Write-Host "Connecting VPN..."
+              rasdial $vpn_if_name;
+          }
+
+          $vpn = Get-VpnConnection -Name $vpn_if_name;
+          if($vpn.ConnectionStatus -eq "Connected"){
+              Write-Host "Setting VPN connection Private profile..."
+              Set-NetConnectionProfile -InterfaceAlias $vpn_if_name -NetworkCategory "Private"
+          }
+          else{
+              Write-Host "VPN is not connected."
+              Write-Host "Cannot set VPN connection Private profile..."
+          }
+      }
+      "Remove" {
+          Write-Host "Removing Vpn Connection..."
+
+          $vpn = Get-VpnConnection -Name $vpn_if_name;
+          if($vpn.ConnectionStatus -eq "Connected"){
+              rasdial $vpn_if_name /DISCONNECT;
+          }
+
+          Remove-VpnConnection -Name $vpn_if_name -Force -PassThru
+
+          Write-Host "Removing Connection Profiles..."
+
+          $key="Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Signatures\Unmanaged\*"
+          Get-ItemProperty -Path $key | where {$_.FirstNetwork -match "$($vpn_if_name).*"} | Remove-Item
+
+          $key="Microsoft.PowerShell.Core\Registry::HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\NetworkList\Profiles\*"
+          Get-ItemProperty -Path $key | where {$_.ProfileName -match "$($vpn_if_name).*"} | Remove-Item
+
+          Write-Host "Removing Certificate CN=$($cn)"
+          Get-ChildItem Cert:\LocalMachine\My |Where-Object { $_.Subject -match "CN=$($cn)" } | Remove-Item
+          Write-Host "Removing Certificate CN=$($icn)"
+          Get-ChildItem Cert:\LocalMachine\CA |Where-Object { $_.Subject -match "CN=$($icn)" } | Remove-Item
+          Write-Host "Removing Certificate CN=$($rcn)"
+          Get-ChildItem Cert:\LocalMachine\Root |Where-Object { $_.Subject -match "CN=$($rcn)" } | Remove-Item
+      }
+    
+      default {
+          Write-Host "Usage " $MyInvocation.MyCommand.Name " ( Install | Remove )"
+      }
+  }
+  # If running in the console, wait for input before closing.
+  if ($Host.Name -eq "ConsoleHost")
+  {
+      Write-Host "Press any key to finish..."
+      $Host.UI.RawUI.FlushInputBuffer()   # Make sure buffered input doesn't "press a key" and skip the ReadKey().
+      $Host.UI.RawUI.ReadKey("NoEcho,IncludeKeyUp") > $null
+  }

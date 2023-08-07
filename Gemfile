@@ -8,7 +8,9 @@ gem 'dm-sqlite-adapter'
 gem 'dm-migrations'
 gem 'dm-validations'
 gem 'ipaddress'
-gem 'certificate_authority'
+gem 'rubyzip', '~> 2.3', '>= 2.3.2'
+
+#gem 'certificate_authority'
 
 # puma is default server now
 #gem 'puma', '~> 5.6', '>= 5.6.4'

@@ -15,7 +15,9 @@ Bundler.require(:default)
 
 # Requires
 require 'singleton'
-require "sinatra/reloader"
+require 'sinatra/reloader'
+require 'zip'
+require 'base64'
 
 # Test config file exists
 CFG_FILE = $root_dir + '/config/rubyca.yml'

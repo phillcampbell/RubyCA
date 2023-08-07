@@ -4,16 +4,18 @@ end
 
 require "etc"
   
-def get_crl_dist_uri
+=begin
+def get_crl_dist_uri_old
   # CRL distribuition URI. 
   # if URI is blank or null use auto generation URI based on config.
   if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? || CONFIG['ca']['crl']['dist']['uri'] ===''
-    crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
+    #crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
   else
     crldist = CONFIG['ca']['crl']['dist']['uri'].map{|uri| "URI:#{uri}"}.join(',')
   end
   return crldist
 end
+=end
 
 def gen_self_signed_root(cipher)
   # Generate self signed root
@@ -42,7 +44,7 @@ def gen_self_signed_root(cipher)
   root_crt.add_extension root_ef.create_extension 'subjectKeyIdentifier', 'hash'
   root_crt.add_extension root_ef.create_extension 'basicConstraints', 'CA:TRUE', true
   root_crt.add_extension root_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true
-  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}"
+  root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}" unless get_crl_dist_uri.nil?
   
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @root_crt = RubyCA::Core::Models::Certificate.create( cn: "#{CONFIG['ca']['root']['cn']}" )
@@ -84,9 +86,9 @@ def gen_intermediate(root_key, root_crt, cipher)
   intermediate_ef.issuer_certificate = root_crt
   intermediate_crt.add_extension intermediate_ef.create_extension 'subjectKeyIdentifier', 'hash'
   intermediate_crt.add_extension intermediate_ef.create_extension 'basicConstraints', 'CA:TRUE', true
-  intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true  
-  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}"
-  
+  intermediate_crt.add_extension intermediate_ef.create_extension 'keyUsage', 'cRLSign,keyCertSign', true 
+  intermediate_crt.add_extension intermediate_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}" unless get_crl_dist_uri.nil?
+
   intermediate_crt.sign root_key, OpenSSL::Digest::SHA512.new
   @intermediate_crt.crt = intermediate_crt.to_pem
   @intermediate_crt.save
@@ -110,17 +112,29 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   ARGV.each do |p|
     if p === "-u" || p === "--unsafe"
       unsafe_mode = true
-      puts "\nYou are running setup in unsafe mode."
-      puts "Be careful with root private key. It is a very sensitive file."
-      puts "I presume you know what are you doing.\n"
+      puts ''
+      puts '******************************************************************'
+      puts '* You are running setup in unsafe mode.                          *'
+      puts '* Be careful with root private key. It is a very sensitive file. *'
+      puts '* I presume you know what are you doing.                         *'
+      puts '******************************************************************'
+      puts ''
     end
   end
   
   unless Process.euid == 0 || unsafe_mode
-    puts "\nError: "
-    puts "First RubyCA run requires root privilege to generate admin CA certificates." 
-    puts "After this, the root privilege is not necessary if server port greater than 1024." 
-    puts "Please run RubyCA using 'sudo ./RubyCA'"
+    puts ''
+    puts '*************************************************************************************'    
+    puts '* Error:                                                                            *'
+    puts '* First RubyCA run requires root privilege to generate admin CA certificates.       *' 
+    puts '* After this, the root privilege is not necessary if server port greater than 1024. *' 
+    puts '* Please run RubyCA with sudo.                                                      *'
+    puts '* sudo ./RubyCA                                                                     *'
+    puts '* If you unable to run sudo, use --unsafe param with caution.                       *'
+    puts '* ./RubyCA --unsafe                                                                 *'
+    puts '*************************************************************************************'
+    puts ''
+    
     abort
   end
   
@@ -144,9 +158,8 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   
   # Finish up
   puts ''
-  puts 'Sucessfully generated root and imtermediate certificates.'
-  
-  puts ''
+  puts 'Sucessfully generated root and imtermediate certificates.\n'
+
   puts '******************************************************************'
   puts '* Warning: The root private key has been encrypted and saved to  *'
   puts '* ./private/root_ca.pem                                          *'

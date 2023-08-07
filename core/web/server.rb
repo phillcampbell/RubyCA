@@ -15,6 +15,10 @@ module RubyCA
         set :port, CONFIG['web']['port']
         set :haml, layout: :layout
         mime_type :pem, 'pem/pem'
+        mime_type :ocsp, 'application/ocsp-response'
+        mime_type :p12, 'application/x-pkcs12'
+        mime_type :zip, 'application/zip'
+        
         
         keyusages = {
           'digitalSignature' => true,
@@ -99,7 +103,7 @@ module RubyCA
             crl_info
           end
         end
-                  
+        
         before '/admin*' do
           remote_addr = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
           unless host_allowed?(remote_addr)
@@ -127,19 +131,54 @@ module RubyCA
           haml :admin
         end
         
-        get '/admin/config' do
+        #
+        # Config
+        #
+        get '/admin/configs/?' do
+          redirect "/admin/config/0"
+        end
+
+        get '/admin/config/?' do
+          #@tab_id = params[:tab_id].to_i
+          if session[:config].nil? || session[:config][:tab_id].nil?
+            @tab_id=0
+          else
+            if (0..2).include?(session[:config][:tab_id])
+              @tab_id=session[:config][:tab_id]
+            else
+              @tab_id=0
+            end
+            session[:config][:tab_id] = nil
+          end
+
           @authcfg = CONFIG['web']['admin']['auth']
           @allowed_ips = CONFIG['web']['admin']['allowed_ips']
           @my_ip = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
+          
+          @vpn_defaults = {}
+          config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_server_address")
+          @vpn_defaults['server_address'] = config_vpn_defaults.value unless config_vpn_defaults.nil?
+          config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_iface_name")
+          @vpn_defaults['iface_name'] = config_vpn_defaults.value unless config_vpn_defaults.nil?
+          
           haml :config
         end
         
-        
-        post '/admin/config' do         
+        post '/admin/config' do
+          unless params[:tab_id].nil?
+            if (0..2).include?(params[:tab_id].to_i)
+              tab_id= { tab_id: params[:tab_id].to_i }
+              session[:config]=tab_id
+            else
+              unless session[:config].nil? && session[:config][:tab_id].nil?
+                session[:config][:tab_id]=nil
+              end
+            end
+          end
+
           if File.writable?(CFG_FILE)
-            
             #Simple User and password auth
-            if params[:authcfg][:auth] == '1'
+            if !params[:authcfg].nil? && params[:authcfg][:auth] == '1'
               CONFIG['web']['admin']['auth'] ||={}
           
               username = params[:authcfg][:username]
@@ -166,7 +205,7 @@ module RubyCA
             end
           
             #Allow IP Address
-            if params[:authcfg][:allow_ip] == '1'
+            if !params[:authcfg].nil? && params[:authcfg][:allow_ip] == '1'
               CONFIG['web']['admin']['allowed_ips'] ||={}
               begin
                 ip = IPAddress params[:authcfg][:ip]              
@@ -193,7 +232,7 @@ module RubyCA
             end
           
             #Disallow IP Address
-            if params[:authcfg][:disallow_ips] == '1'
+            if !params[:authcfg].nil? && params[:authcfg][:disallow_ips] == '1'
               CONFIG['web']['admin']['allowed_ips'] ||={}
             
               params[:authcfg][:ips].each do |ip|
@@ -204,12 +243,40 @@ module RubyCA
               CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
               flash.next[:success] = "<strong>#{params[:authcfg][:ips]}</strong> deleted from allowed ips."
             end
+
+            # Save vpn defaults settings
+            msg = ''
+            unless params[:vpn_defaults].nil?
+              unless params[:vpn_defaults][:server_address].nil?
+                config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_server_address")
+                if config_vpn_defaults.nil?
+                  config_vpn_defaults = RubyCA::Core::Models::Config.create(name: "vpn_defaults_server_address", value: '')
+                end
+                config_vpn_defaults.value = params[:vpn_defaults][:server_address]
+                config_vpn_defaults.save
+                msg = "</br>server address: <strong>#{params[:vpn_defaults][:server_address]}</strong> Saved"
+              end
+
+              unless params[:vpn_defaults][:iface_name].nil?
+                config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_iface_name")
+                if config_vpn_defaults.nil?
+                  config_vpn_defaults = RubyCA::Core::Models::Config.create(name: "vpn_defaults_iface_name", value: '')
+                end
+                config_vpn_defaults.value = params[:vpn_defaults][:iface_name]
+                config_vpn_defaults.save
+                msg += "</br>interface name: <strong>#{params[:vpn_defaults][:iface_name]}</strong> Saved"
+              end
+              flash.next[:success] = "#{msg}"
+            end
           else
             flash.next[:danger] = "<strong>#{CFG_FILE}</strong> is not writable. Fix it before set anything here."
-          end                    
-          redirect '/admin/config'
+          end                  
+          redirect "/admin/config"
         end
-                
+        
+        #
+        # CRL
+        #
         get '/admin/crl' do
           @crl_info = get_crl_info
           @crl_dist = CONFIG['ca']['crl']['dist']['uri']
@@ -258,7 +325,6 @@ module RubyCA
           
           redirect '/admin/crl'
         end
-        
         
         get '/admin/crl/info' do
           crl_rec = RubyCA::Core::Models::CRL.last
@@ -348,7 +414,9 @@ module RubyCA
           content_buffer
         end
         
-        
+        #
+        # Certificate Signing Requests
+        #
         get '/admin/csrs/:cn/info' do
           csr_rec = RubyCA::Core::Models::CSR.get(params[:cn])
           csr = OpenSSL::X509::Request.new csr_rec.csr
@@ -358,11 +426,12 @@ module RubyCA
       
         get '/admin/csrs/?' do
           @csrs = RubyCA::Core::Models::CSR.all
+          @cschemas = RubyCA::Core::Models::CertificateSchema.all
           @csr = session[:csr]
           haml :csrs
         end
         
-        post '/admin/csrs/?' do            
+        post '/admin/csrs/?' do
           session.delete(:csr)
           params[:csr].each do |k,v|
             if v.nil? || v.empty?
@@ -387,11 +456,11 @@ module RubyCA
           end
           
           @csr = RubyCA::Core::Models::CSR.create(
-              cn: params[:csr][:cn],
-              o: params[:csr][:o],
-              l: params[:csr][:l],
-              st: params[:csr][:st],
-              c: params[:csr][:c] )
+            cn: params[:csr][:cn],
+            o: params[:csr][:o],
+            l: params[:csr][:l],
+            st: params[:csr][:st],
+            c: params[:csr][:c] )
               
           cipher = OpenSSL::Cipher.new 'AES-256-CBC'
           key = OpenSSL::PKey::RSA.new 2048
@@ -494,13 +563,7 @@ module RubyCA
           crt.add_extension crt_ef.create_extension 'subjectKeyIdentifier','hash', false
           altnames = params[:subjectAltName].reject{|k,v| v.empty?}
           crt.add_extension crt_ef.create_extension 'subjectAltName',"#{altnames.map{|san,v| "#{san}:#{v}"}.join(',')}" unless altnames.empty? 
-          
-          if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? || CONFIG['ca']['crl']['dist']['uri'] ===''
-            crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
-          else
-            crldist = CONFIG['ca']['crl']['dist']['uri'].map{|uri| "URI:#{uri}"}.join(',')
-          end
-          crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "#{crldist}"
+          crt.add_extension crt_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}" unless get_crl_dist_uri.nil?
           
           crt.sign intermediate_key, OpenSSL::Digest::SHA512.new
           @crt.crt = crt.to_pem
@@ -511,6 +574,54 @@ module RubyCA
           redirect '/admin/certificates'
         end
         
+        #
+        # Certificate Schemas
+        #
+        get '/admin/cschemas/?' do
+          @cschemas = RubyCA::Core::Models::CertificateSchema.all
+          @cschema = session[:cschema]
+          haml :certificate_schemas
+        end
+        
+        get '/admin/cschema/:id?' do
+          @cschema = RubyCA::Core::Models::CertificateSchema.get(params[:id])
+          session[:csr] = @cschema if @cschema 
+          redirect '/admin/csrs'
+        end
+        
+        post '/admin/cschemas/?' do
+          session.delete(:cschema)
+          params[:cschema].each do |k,v|
+            if v.nil? || v.empty?
+              session[:cschema] = params[:cschema]
+              flash.next[:danger] = "All fields are required"
+              redirect '/admin/cschemas'
+            end  
+          end
+          cshema = RubyCA::Core::Models::CertificateSchema.create(
+            o: params[:cschema][:o],
+            l: params[:cschema][:l],
+            st: params[:cschema][:st],
+            c: params[:cschema][:c])
+          cshema.save
+          redirect '/admin/cschemas'
+        end
+        
+        get '/admin/cschemas/cancel' do
+          session.delete(:cschema)
+          redirect '/admin/cschemas'
+        end
+        
+        delete '/admin/cschemas/:id/?' do
+          cschema = RubyCA::Core::Models::CertificateSchema.get(params[:id])
+          cschema.destroy
+          flash.next[:success] = "Deleted certificate schema for '#{cschema.o}'"
+          redirect '/admin/cschemas'
+        end
+        
+        #
+        # Certificates
+        #
         get '/admin/certificates/?' do
           @certificates = RubyCA::Core::Models::Certificate.all
           @revokeds = RubyCA::Core::Models::Revoked.all
@@ -635,19 +746,76 @@ module RubyCA
           end
         end
         
-        get '/admin/download/:url' do
-          if session[:download_cont]
-            content = session.delete(:download_cont)
-            if session[:download_cont_type]
-              download_cont_type = session.delete(:download_cont_type)
-            else
-              download_cont_type = "application/octet-stream"
-            end
-            content_type download_cont_type
-            content
-          else
-            flash.next[:danger] = "Session expired. Download content not found! Try again..."
+        get '/admin/certificates/:cn.zip' do
+          @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
+          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+            flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled."
             redirect '/admin/certificates'
+          else
+            @vpn_defaults = {}
+            config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_server_address")
+            @vpn_defaults['server_address'] = config_vpn_defaults.value unless config_vpn_defaults.nil?
+            config_vpn_defaults = RubyCA::Core::Models::Config.get("vpn_defaults_iface_name")
+            @vpn_defaults['iface_name'] = config_vpn_defaults.value unless config_vpn_defaults.nil?
+            haml :zip
+          end
+        end
+        
+        post '/admin/certificates/:cn.zip' do
+          @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
+          rawCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['root']['cn'])
+          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          root_ca = OpenSSL::X509::Certificate.new rawCA.crt
+          root_int_ca = OpenSSL::X509::Certificate.new rawintCA.crt
+          
+          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+            flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled."
+            redirect '/admin/certificates'
+          else
+            raw = @crt.crt
+            cert = OpenSSL::X509::Certificate.new raw
+            begin
+              deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
+            rescue OpenSSL::PKey::RSAError
+              flash.next[:danger] = "Incorrect certificate passphrase"
+              redirect "/admin/certificates/#{params[:cn]}.zip"
+              
+            end
+            
+            begin
+              p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
+              
+              zbuf = Zip::OutputStream.write_buffer do |out|
+                out.put_next_entry("vpn/#{params[:cn]}.p12")
+                out.write(p12.to_der)
+                
+                out.put_next_entry("vpn/install.bat")
+                out.write(Haml::Template.new('core/web/views/zip/install.bat.haml').render)
+                
+                out.put_next_entry("vpn/remove.bat")
+                out.write(Haml::Template.new('core/web/views/zip/remove.bat.haml').render)
+                
+                out.put_next_entry("vpn/vpn_cert_tool.ps1")
+                parms = {
+                  vpn_if_name: "bitpamp",
+                  vpn_server_addr: "suporte.bitpamp.com.br",
+                  epw: Base64::strict_encode64(params[:passphrase][:certificate]),
+                  cn: params[:cn],
+                  icn: rawintCA.cn,
+                  rcn: rawCA.cn
+                }
+                out.write(Haml::Template.new('core/web/views/zip/vpn_cert_tool.ps1.haml').render(Object.new, parms))
+              end
+              
+              session[:download_cont] = zbuf.string
+              session[:download_cont_type] = :zip
+              @download_url = "/admin/download/#{params[:cn]}.zip"
+              haml :download
+              
+            rescue OpenSSL::PKCS12::PKCS12Error
+              flash.next[:danger] = "Cannot generate zip file."
+              redirect "/admin/certificates/#{params[:cn]}.zip"
+            end
           end
         end
         
@@ -744,15 +912,31 @@ module RubyCA
           redirect '/admin/certificates'
         end
         
-        get '/admin/ovpn/server.conf' do          
-          content_type :txt          
-          haml :'ovpn/server_templ', layout: false
+        #
+        # Download
+        #
+        get '/admin/download/:url' do
+          if session[:download_cont]
+            content = session.delete(:download_cont)
+            if session[:download_cont_type]
+              download_cont_type = session.delete(:download_cont_type)
+            else
+              download_cont_type = "application/octet-stream"
+            end
+            content_type download_cont_type
+            content
+          else
+            flash.next[:danger] = "Session expired. Download content not found! Try again..."
+            redirect '/admin/certificates'
+          end
         end
         
+        
         not_found do
-          haml :not_found #'404 - Not Found'
+          haml :not_found
         end
-      	
+        
+=begin
         get '/admin/dh.pem' do
           # ATTENTION
           # Be carefull. This is a experimental issue.
@@ -769,6 +953,9 @@ module RubyCA
           #symm_key2 = dh2.compute_key(dh1.pub_key)
           #puts symm_key1 == symm_key2 # => true
         end
+=end
+        
+        
       end
     end
   end
