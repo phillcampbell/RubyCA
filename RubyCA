@@ -9,7 +9,7 @@ require 'core/load'
 require 'core/bootstrap'
 
 # Start server
-if CONFIG['web']['port'] < 1024
+if $config['web']['port'] < 1024
   unless Process.euid == 0 
     puts "\nError: RubyCA is set to use port less than 1024. Need root access."
     puts "Root privileges will be dropped once the server bind port."

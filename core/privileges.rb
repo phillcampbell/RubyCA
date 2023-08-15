@@ -4,12 +4,12 @@ module RubyCA
   module Core
     class Privileges   
       def self.drop
-        puts CONFIG['privileges']
-        if CONFIG['privileges'] && CONFIG['privileges']['user']
+        puts $config['privileges']
+        if $config['privileges'] && $config['privileges']['user']
           # Drop privileges
           puts ''
           puts 'Dropping privileges...'
-          Process::Sys.setuid(Etc.getpwnam(CONFIG['privileges']['user']).uid)
+          Process::Sys.setuid(Etc.getpwnam($config['privileges']['user']).uid)
           # Check RubyCA has drops its privileges successfully
           begin
             Process::Sys.setuid(0)

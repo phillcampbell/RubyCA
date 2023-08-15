@@ -11,8 +11,8 @@ module RubyCA
         use Rack::MethodOverride
         use Rack::Session::Pool
         register Sinatra::Flash
-        set :bind, CONFIG['web']['interface']
-        set :port, CONFIG['web']['port']
+        set :bind, $config['web']['interface']
+        set :port, $config['web']['port']
         set :haml, layout: :layout
         mime_type :pem, 'pem/pem'
         mime_type :ocsp, 'application/ocsp-response'
@@ -44,7 +44,7 @@ module RubyCA
             allowed = false
             ip_addr = IPAddress addr
             
-            CONFIG['web']['admin']['allowed_ips'].each do |allowed_ip|
+            $config['web']['admin']['allowed_ips'].each do |allowed_ip|
               allow = IPAddress allowed_ip
               if (ip_addr.ipv4? && allow.ipv4?) || (ip_addr.ipv6? && allow.ipv6?)
                 if allow.include? ip_addr
@@ -57,7 +57,7 @@ module RubyCA
           end
           
           def protected!
-            authcfg = CONFIG['web']['admin']['auth']
+            authcfg = $config['web']['admin']['auth']
             @user = authcfg['username'] unless authcfg.nil? || authcfg.empty?
             @pass = authcfg['password'] unless authcfg.nil? || authcfg.empty?
             permit_auth = authcfg['enable'] && !(authcfg.nil? || authcfg.empty? || @user.nil? || @user.empty? || @pass.nil? || @pass.empty?)
@@ -151,8 +151,8 @@ module RubyCA
             session[:config][:tab_id] = nil
           end
 
-          @authcfg = CONFIG['web']['admin']['auth']
-          @allowed_ips = CONFIG['web']['admin']['allowed_ips']
+          @authcfg = $config['web']['admin']['auth']
+          @allowed_ips = $config['web']['admin']['allowed_ips']
           @my_ip = request.env['HTTP_X_REAL_IP'] || request.env['HTTP_X_FORWARDED_FOR'] || request.ip
           
           @vpn_defaults = {}
@@ -179,7 +179,7 @@ module RubyCA
           if File.writable?(CFG_FILE)
             #Simple User and password auth
             if !params[:authcfg].nil? && params[:authcfg][:auth] == '1'
-              CONFIG['web']['admin']['auth'] ||={}
+              $config['web']['admin']['auth'] ||={}
           
               username = params[:authcfg][:username]
               password = params[:authcfg][:password]
@@ -188,13 +188,12 @@ module RubyCA
               
               unless username.nil? || username.empty? || password.nil? || password.empty? || confirm_password.nil? || confirm_password.empty?
                 if password == confirm_password
-                  CONFIG['web']['admin']['auth']['username'] = Digest::SHA2.hexdigest(username) 
-                  CONFIG['web']['admin']['auth']['password'] = Digest::SHA2.hexdigest(password)
-                  CONFIG['web']['admin']['auth']['enable'] = enable
+                  $config['web']['admin']['auth']['username'] = Digest::SHA2.hexdigest(username) 
+                  $config['web']['admin']['auth']['password'] = Digest::SHA2.hexdigest(password)
+                  $config['web']['admin']['auth']['enable'] = enable
           
-                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
-          
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump($config, f) } #Store
+                  $config = YAML.load(File.read(CFG_FILE)) # Reload
                   flash.next[:success] = "Admin authentication settings stored"
                 else
                   flash.next[:danger] = "Password and confirm password does not match."
@@ -206,7 +205,7 @@ module RubyCA
           
             #Allow IP Address
             if !params[:authcfg].nil? && params[:authcfg][:allow_ip] == '1'
-              CONFIG['web']['admin']['allowed_ips'] ||={}
+              $config['web']['admin']['allowed_ips'] ||={}
               begin
                 ip = IPAddress params[:authcfg][:ip]              
               rescue  
@@ -214,16 +213,16 @@ module RubyCA
               end
             
               unless ip.nil?          
-                #unless CONFIG['web']['admin']['allowed_ips'].include? params[:authcfg][:ip]
+                #unless $config['web']['admin']['allowed_ips'].include? params[:authcfg][:ip]
                 unless host_allowed?(params[:authcfg][:ip])
                   if ip.network?
-                    CONFIG['web']['admin']['allowed_ips'].push("#{ip}/#{ip.prefix}")
+                    $config['web']['admin']['allowed_ips'].push("#{ip}/#{ip.prefix}")
                   else
-                    CONFIG['web']['admin']['allowed_ips'].push("#{ip}")
+                    $config['web']['admin']['allowed_ips'].push("#{ip}")
                   end
               
-                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump($config, f) } #Store
+                  $config = YAML.load(File.read(CFG_FILE)) # Reload
                   flash.next[:success] = "<strong>#{params[:authcfg][:ip]}</strong> added to allowed ips."
                 else
                   flash.next[:warning] = "<strong>#{params[:authcfg][:ip]}</strong> is already allowed ip address."
@@ -233,14 +232,14 @@ module RubyCA
           
             #Disallow IP Address
             if !params[:authcfg].nil? && params[:authcfg][:disallow_ips] == '1'
-              CONFIG['web']['admin']['allowed_ips'] ||={}
+              $config['web']['admin']['allowed_ips'] ||={}
             
               params[:authcfg][:ips].each do |ip|
-                CONFIG['web']['admin']['allowed_ips'].delete("#{ip}")
+                $config['web']['admin']['allowed_ips'].delete("#{ip}")
               end
             
-              File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-              CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
+              File.open(CFG_FILE, 'w') {|f| YAML.dump($config, f) } #Store
+              $config = YAML.load(File.read(CFG_FILE)) # Reload
               flash.next[:success] = "<strong>#{params[:authcfg][:ips]}</strong> deleted from allowed ips."
             end
 
@@ -279,7 +278,7 @@ module RubyCA
         #
         get '/admin/crl' do
           @crl_info = get_crl_info
-          @crl_dist = CONFIG['ca']['crl']['dist']['uri']
+          @crl_dist = $config['ca']['crl']['dist']['uri']
           haml :crl
         end
         
@@ -288,14 +287,14 @@ module RubyCA
             
             #Add
             if params[:ca][:crl][:dist][:add_uri] == '1'
-              CONFIG['ca']['crl']['dist']['uri'] ||={}
+              $config['ca']['crl']['dist']['uri'] ||={}
               if (params[:ca][:crl][:dist][:uri]==="")
                 flash.next[:danger] = "URI is empty."
               else
-                unless CONFIG['ca']['crl']['dist']['uri'].include? params[:ca][:crl][:dist][:uri]
-                  CONFIG['ca']['crl']['dist']['uri'].push(params[:ca][:crl][:dist][:uri])
-                  File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                  CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
+                unless $config['ca']['crl']['dist']['uri'].include? params[:ca][:crl][:dist][:uri]
+                  $config['ca']['crl']['dist']['uri'].push(params[:ca][:crl][:dist][:uri])
+                  File.open(CFG_FILE, 'w') {|f| YAML.dump($config, f) } #Store
+                  $config = YAML.load(File.read(CFG_FILE)) # Reload
                   flash.next[:success] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> added to crl distribution points list."
                 else
                   flash.next[:warning] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> is already in crl distribution points list."
@@ -306,13 +305,13 @@ module RubyCA
             #Remove
             if params[:ca][:crl][:dist][:rm_uri] == '1'
               unless (params[:ca][:crl][:dist][:uri].nil? || params[:ca][:crl][:dist][:uri]==="" )
-                CONFIG['ca']['crl']['dist']['uri'] ||={}
+                $config['ca']['crl']['dist']['uri'] ||={}
                 params[:ca][:crl][:dist][:uri].each do |uri|
-                  CONFIG['ca']['crl']['dist']['uri'].delete("#{uri}")
+                  $config['ca']['crl']['dist']['uri'].delete("#{uri}")
                 end
             
-                File.open(CFG_FILE, 'w') {|f| YAML.dump(CONFIG, f) } #Store
-                CONFIG = YAML.load(File.read(CFG_FILE)) # Reload
+                File.open(CFG_FILE, 'w') {|f| YAML.dump($config, f) } #Store
+                $config = YAML.load(File.read(CFG_FILE)) # Reload
                 flash.next[:success] = "<strong>#{params[:ca][:crl][:dist][:uri]}</strong> deleted from crl distribution points list."
               else
                 flash.next[:warning] = "Select the crl distribution point do you want delete."
@@ -344,7 +343,7 @@ module RubyCA
         end
         
         post '/admin/crl/renew' do                        
-          intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          intermediate = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           begin
             intermediate_key = OpenSSL::PKey::RSA.new intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError
@@ -377,7 +376,7 @@ module RubyCA
           content_buffer += "---------------------------------------------------------------\n"
           content_buffer += " RubyCA - Renew CRL\n\n"
           content_buffer += "---------------------------------------------------------------\n"
-          intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          intermediate = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           validpw = true
           begin
             intermediate_key = OpenSSL::PKey::RSA.new intermediate.pkey, params[:passphrase][:intermediate]
@@ -530,7 +529,7 @@ module RubyCA
             redirect '/admin/csrs'
           end
           @csr = RubyCA::Core::Models::CSR.get(params[:cn])
-          @intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          @intermediate = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           begin
             intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError
@@ -549,7 +548,7 @@ module RubyCA
           @serial.save
           crt.version = 2
           crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, Time.now.hour, Time.now.min,Time.now.sec)
-          crt.not_after = crt.not_before + (CONFIG['ca']['certificate']['default_expiration'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['certificate']['default_expiration'] / 4).to_int * 24 * 60 * 60)
+          crt.not_after = crt.not_before + ($config['ca']['certificate']['default_expiration'] * 365 * 24 * 60 * 60 - 1) + (($config['ca']['certificate']['default_expiration'] / 4).to_int * 24 * 60 * 60)
           crt.subject = csr.subject
           crt.public_key = csr.public_key
           crt.issuer = intermediate_crt.subject
@@ -651,18 +650,18 @@ module RubyCA
         
         get '/admin/certificates/chain/:cn.crt' do
           output = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn]).crt
-          unless params[:cn] === CONFIG['ca']['root']['cn'] or params[:cn] === CONFIG['ca']['intermediate']['cn']
-            output << RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn']).crt
+          unless params[:cn] === $config['ca']['root']['cn'] or params[:cn] === $config['ca']['intermediate']['cn']
+            output << RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn']).crt
           end
-          unless params[:cn] === CONFIG['ca']['root']['cn']
-            output << RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['root']['cn']).crt
+          unless params[:cn] === $config['ca']['root']['cn']
+            output << RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['root']['cn']).crt
           end
           content_type :crt
           output
         end
         
         get '/admin/certificates/:cn.pem' do
-          if params[:cn] === CONFIG['ca']['root']['cn']
+          if params[:cn] === $config['ca']['root']['cn']
             halt 404
           end
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
@@ -672,7 +671,7 @@ module RubyCA
         
         get '/admin/certificates/decrypted/:cn.pem' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate decrypted private key are disabled"
             redirect '/admin/certificates'
           else
@@ -682,7 +681,7 @@ module RubyCA
         
         post '/admin/certificates/decrypted/:cn.pem' do   
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate decrypted private key are disabled"
             redirect '/admin/certificates'
           else
@@ -702,7 +701,7 @@ module RubyCA
 
         get '/admin/certificates/:cn.p12' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled"
             redirect '/admin/certificates'
           else
@@ -712,12 +711,12 @@ module RubyCA
         
         post '/admin/certificates/:cn.p12' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          rawCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['root']['cn']).crt
-          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn']).crt
+          rawCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['root']['cn']).crt
+          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn']).crt
           root_ca = OpenSSL::X509::Certificate.new rawCA
           root_int_ca = OpenSSL::X509::Certificate.new rawintCA
           
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled"
             redirect '/admin/certificates'
           else
@@ -748,7 +747,7 @@ module RubyCA
         
         get '/admin/certificates/:cn.zip' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled."
             redirect '/admin/certificates'
           else
@@ -763,12 +762,12 @@ module RubyCA
         
         post '/admin/certificates/:cn.zip' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          rawCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['root']['cn'])
-          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          rawCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['root']['cn'])
+          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           root_ca = OpenSSL::X509::Certificate.new rawCA.crt
           root_int_ca = OpenSSL::X509::Certificate.new rawintCA.crt
           
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled."
             redirect '/admin/certificates'
           else
@@ -821,7 +820,7 @@ module RubyCA
         
         get '/admin/certificates/:cn/chpwd?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn']
+          if @crt.cn === $config['ca']['root']['cn']
             flash.next[:danger] = "Cannot change the root password"
             redirect '/admin/certificates'
           end
@@ -844,7 +843,7 @@ module RubyCA
           end
                       
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn']
+          if @crt.cn === $config['ca']['root']['cn']
             flash.next[:danger] = "Root private key password change are disabled."
             redirect '/admin/certificates'
           else
@@ -865,7 +864,7 @@ module RubyCA
         
         get '/admin/certificates/:cn/revoke/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
             redirect '/admin/certificates'
           end
@@ -874,7 +873,7 @@ module RubyCA
         
         delete '/admin/certificates/:cn/revoke/?' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
-          if @crt.cn === CONFIG['ca']['root']['cn'] or @crt.cn === CONFIG['ca']['intermediate']['cn']
+          if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Cannot revoke the root or intermediate certificates"
             redirect '/admin/certificates'
           end
@@ -882,7 +881,7 @@ module RubyCA
           revoked = OpenSSL::X509::Revoked.new
           revoked.serial = crt.serial
           revoked.time = Time.now
-          @intermediate = RubyCA::Core::Models::Certificate.get_by_cn(CONFIG['ca']['intermediate']['cn'])
+          @intermediate = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           begin
             intermediate_key = OpenSSL::PKey::RSA.new @intermediate.pkey, params[:passphrase][:intermediate]
           rescue OpenSSL::PKey::RSAError

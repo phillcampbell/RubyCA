@@ -29,5 +29,5 @@ unless File.exists?(CFG_FILE) or File.file?(CFG_FILE)
   puts '------------------'
   abort
 end
-# Load config into global CONFIG
-CONFIG = YAML.load(File.read(CFG_FILE))
+# Load config into global $config
+$config = YAML.load(File.read(CFG_FILE))

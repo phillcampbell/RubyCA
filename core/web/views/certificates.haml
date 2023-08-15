@@ -11,32 +11,32 @@
           = crt.cn
         %td.float-right
           .btn-group
-            %a.btn.btn-sm.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", "data-get" => "modal", "data-title" => "Certificate Info" }
+            %a.btn.btn-sm.btn-info{ :href => "/admin/certificates/#{crt.cn}/info", 'data-get' => 'modal', 'data-title' => 'Certificate Info' }
               %i.fas.fa-info-circle
               %span.d-none.d-md-inline Info
             .btn-group
-              %a.btn.btn-sm.btn-primary.dropdown-toggle.bt-download{ :href => "#", "data-toggle" => "dropdown" } 
+              %a.btn.btn-sm.btn-primary.dropdown-toggle.bt-download{ :href => "#", 'data-toggle' => 'dropdown'} 
                 %i.fas.fa-download
                 %span.d-none.d-md-inline Download
                 %span.caret
               .dropdown-menu.dropdown-menu-right
                 %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.crt" } Certificate (.crt)
             
-                - unless crt.cn === CONFIG['ca']['root']['cn']               
+                - unless crt.cn === $config['ca']['root']['cn']               
                   %a.dropdown-item{ href: "/admin/certificates/chain/#{crt.cn}.crt" } Chain (.crt)
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.pem" } Private Key (.pem)
                 
-                - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
+                - unless crt.cn === $config['ca']['root']['cn'] or crt.cn === $config['ca']['intermediate']['cn']
                   %a.dropdown-item{ href: "/admin/certificates/decrypted/#{crt.cn}.pem" } Unencrypted Private Key (.pem)
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.p12" } Bundled PKCS #12 (.p12)
                   %a.dropdown-item{ href: "/admin/certificates/#{crt.cn}.zip" } Ipsec config Windows Install (.zip)
             
-            - unless crt.cn === CONFIG['ca']['root']['cn']
+            - unless crt.cn === $config['ca']['root']['cn']
               %a.btn.btn-secondary.btn-sm{ href: "/admin/certificates/#{crt.cn}/chpwd" }
                 %i.fas.fa-key
                 %span.d-none.d-md-inline Password
             
-            - unless crt.cn === CONFIG['ca']['root']['cn'] or crt.cn === CONFIG['ca']['intermediate']['cn']
+            - unless crt.cn === $config['ca']['root']['cn'] or crt.cn === $config['ca']['intermediate']['cn']
               %a.btn.btn-danger.btn-sm{ :href => "/admin/certificates/#{crt.cn}/revoke" }
                 %i.fas.fa-times
                 %span.d-none.d-md-inline Revoke

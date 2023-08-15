@@ -8,11 +8,11 @@
   %tbody
     %tr
       %td 
-        = @crl_info[:issuer]["CN"]
+        = @crl_info[:issuer]['CN']
       %td
-        = @crl_info[:next_update].strftime("%d/%m/%Y %H:%M:%S")  
+        = @crl_info[:next_update].strftime('%d/%m/%Y %H:%M:%S')  
 
-%form#csr.form-horizontal{ action: "/admin/crl/renew", method: 'post' }
+%form#csr.form-horizontal{ action: '/admin/crl/renew', method: 'post' }
   %fieldset
     %legend Enter Passphrase
     .form-group

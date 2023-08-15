@@ -40,7 +40,7 @@
             -locals[:keyusages].map do |usage,default|
               .form-check
                 %label.form-check-label{ for: "keyusages[#{usage}]" }
-                %input.form-check-input{:type=>"checkbox", :name=>"keyusages[#{usage}]", :value=>1, :checked=>default} #{usage} 
+                %input.form-check-input{:type=>'checkbox', :name=>"keyusages[#{usage}]", :value=>1, :checked=>default} #{usage} 
         
         .row
           %legend Extended Key Usage (optional)
@@ -48,7 +48,7 @@
             -locals[:extendedkeyusages].map do |ext,default|
               .form-check
                 %label.form-check-label{ for: 'extendedkeyusages[#{ext}]' }		
-                %input.form-check-input{:type=>"checkbox", :name=>"extendedkeyusages[#{ext}]", :value=>1, :checked=>default} #{ext}
+                %input.form-check-input{:type=>'checkbox', :name=>"extendedkeyusages[#{ext}]", :value=>1, :checked=>default} #{ext}
 
           
   %legend Enter Passphrases to Sign CSR
@@ -58,4 +58,4 @@
   .form-group
     %button.btn.btn-primary{ type: 'submit' } Sign Certificate
     -if !@sign.nil?
-      %a.btn.btn-secondary{ href: "/admin/csrs/sign/cancel" } Cancel
+      %a.btn.btn-secondary{ href: '/admin/csrs/sign/cancel' } Cancel

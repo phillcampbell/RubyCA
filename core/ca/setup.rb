@@ -8,10 +8,10 @@ require "etc"
 def get_crl_dist_uri_old
   # CRL distribuition URI. 
   # if URI is blank or null use auto generation URI based on config.
-  if CONFIG['ca']['crl']['dist'].nil? || CONFIG['ca']['crl']['dist']['uri'].nil? || CONFIG['ca']['crl']['dist']['uri'] ===''
-    #crldist = "URI:http://#{CONFIG['web']['domain']}#{(':' + CONFIG['web']['port'].to_s) unless CONFIG['web']['port'] == 80}/ca.crl"  
+  if $config['ca']['crl']['dist'].nil? || $config['ca']['crl']['dist']['uri'].nil? || $config['ca']['crl']['dist']['uri'] ===''
+    #crldist = "URI:http://#{$config['web']['domain']}#{(':' + $config['web']['port'].to_s) unless $config['web']['port'] == 80}/ca.crl"  
   else
-    crldist = CONFIG['ca']['crl']['dist']['uri'].map{|uri| "URI:#{uri}"}.join(',')
+    crldist = $config['ca']['crl']['dist']['uri'].map{|uri| "URI:#{uri}"}.join(',')
   end
   return crldist
 end
@@ -28,13 +28,13 @@ def gen_self_signed_root(cipher)
     io.write root_key.export(cipher)
   end
   # Create root certificate
-  root_name = OpenSSL::X509::Name.parse "/C=#{CONFIG['ca']['root']['country']}/ST=#{CONFIG['ca']['root']['state']}/L=#{CONFIG['ca']['root']['locality']}/O=#{CONFIG['ca']['root']['organisation']}/CN=#{CONFIG['ca']['root']['cn']}"
+  root_name = OpenSSL::X509::Name.parse "/C=#{$config['ca']['root']['country']}/ST=#{$config['ca']['root']['state']}/L=#{$config['ca']['root']['locality']}/O=#{$config['ca']['root']['organisation']}/CN=#{$config['ca']['root']['cn']}"
   root_crt = OpenSSL::X509::Certificate.new
   root_crt.serial = 0x10000000000000000000000000000000 + rand(0x01000000000000000000000000000000)
   RubyCA::Core::Models::Config.create( name: 'last_serial', value: root_crt.serial.to_s )
   root_crt.version = 2
   root_crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
-  root_crt.not_after = root_crt.not_before  + (CONFIG['ca']['root']['years'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['root']['years'] / 4).to_int * 24 * 60 * 60)
+  root_crt.not_after = root_crt.not_before  + ($config['ca']['root']['years'] * 365 * 24 * 60 * 60 - 1) + (($config['ca']['root']['years'] / 4).to_int * 24 * 60 * 60)
   root_crt.public_key = root_key.public_key
   root_crt.subject = root_name
   root_crt.issuer = root_name
@@ -47,7 +47,7 @@ def gen_self_signed_root(cipher)
   root_crt.add_extension root_ef.create_extension 'crlDistributionPoints', "#{get_crl_dist_uri}" unless get_crl_dist_uri.nil?
   
   root_crt.sign root_key, OpenSSL::Digest::SHA512.new
-  @root_crt = RubyCA::Core::Models::Certificate.create( cn: "#{CONFIG['ca']['root']['cn']}" )
+  @root_crt = RubyCA::Core::Models::Certificate.create( cn: "#{$config['ca']['root']['cn']}" )
   @root_crt.crt = root_crt.to_pem
   @root_crt.save
   
@@ -59,13 +59,13 @@ def gen_intermediate(root_key, root_crt, cipher)
   intermediate_key = OpenSSL::PKey::RSA.new 2048
   puts ''
   puts 'Enter a pass phrase for the intermediate CA key.'
-  @intermediate_crt = RubyCA::Core::Models::Certificate.create( cn: "#{CONFIG['ca']['intermediate']['cn']}" )
+  @intermediate_crt = RubyCA::Core::Models::Certificate.create( cn: "#{$config['ca']['intermediate']['cn']}" )
   @intermediate_crt.pkey = intermediate_key.export(cipher)
   
   # Generate intermediate csr
   intermediate_csr = OpenSSL::X509::Request.new
   intermediate_csr.version = 2
-  intermediate_csr.subject = OpenSSL::X509::Name.parse "/C=#{CONFIG['ca']['intermediate']['country']}/ST=#{CONFIG['ca']['intermediate']['state']}/L=#{CONFIG['ca']['intermediate']['locality']}/O=#{CONFIG['ca']['intermediate']['organisation']}/CN=#{CONFIG['ca']['intermediate']['cn']}"
+  intermediate_csr.subject = OpenSSL::X509::Name.parse "/C=#{$config['ca']['intermediate']['country']}/ST=#{$config['ca']['intermediate']['state']}/L=#{$config['ca']['intermediate']['locality']}/O=#{$config['ca']['intermediate']['organisation']}/CN=#{$config['ca']['intermediate']['cn']}"
   intermediate_csr.public_key = intermediate_key.public_key
   intermediate_csr.sign intermediate_key, OpenSSL::Digest::SHA512.new
   
@@ -77,7 +77,7 @@ def gen_intermediate(root_key, root_crt, cipher)
   @serial.save
   intermediate_crt.version = 2
   intermediate_crt.not_before = Time.utc(Time.now.year, Time.now.month, Time.now.day, 00, 00, 0)
-  intermediate_crt.not_after = intermediate_crt.not_before  + (CONFIG['ca']['intermediate']['years'] * 365 * 24 * 60 * 60 - 1) + ((CONFIG['ca']['intermediate']['years'] / 4).to_int * 24 * 60 * 60)
+  intermediate_crt.not_after = intermediate_crt.not_before  + ($config['ca']['intermediate']['years'] * 365 * 24 * 60 * 60 - 1) + (($config['ca']['intermediate']['years'] / 4).to_int * 24 * 60 * 60)
   intermediate_crt.subject = intermediate_csr.subject
   intermediate_crt.public_key = intermediate_csr.public_key
   intermediate_crt.issuer = root_crt.subject
@@ -167,25 +167,25 @@ unless RubyCA::Core::Models::Config.get('first_run_complete')
   puts '******************************************************************'
   
   RubyCA::Core::Models::Config.create( name: 'first_run_complete', value: true )
-  unless (CONFIG['privileges'].nil?)
+  unless ($config['privileges'].nil?)
     uid = nil
     gid = nil
     
-    unless (CONFIG['privileges']['user'].nil? || CONFIG['privileges']['user'] ==='')
+    unless ($config['privileges']['user'].nil? || $config['privileges']['user'] ==='')
       begin
-        info = Etc.getpwnam(CONFIG['privileges']['user'])
+        info = Etc.getpwnam($config['privileges']['user'])
       rescue
-        puts "\nUser #{CONFIG['privileges']['user']} does not exists."
+        puts "\nUser #{$config['privileges']['user']} does not exists."
       else
         uid = info.uid
       end
     end
     
-    unless (CONFIG['privileges']['group'].nil? || CONFIG['privileges']['group'] ==='')
+    unless ($config['privileges']['group'].nil? || $config['privileges']['group'] ==='')
       begin
-        ginfo = Etc.getgrnam(CONFIG['privileges']['group'])
+        ginfo = Etc.getgrnam($config['privileges']['group'])
       rescue
-        puts "\nGroup #{CONFIG['privileges']['group']} does not exists."
+        puts "\nGroup #{$config['privileges']['group']} does not exists."
       else
         gid = ginfo.gid
       end
