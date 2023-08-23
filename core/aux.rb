@@ -9,3 +9,12 @@ def get_crl_dist_uri
   return crldist
   puts "From setup"
 end
+
+def random_password(length=12)
+  chars = ('0'..'9').to_a + ('A'..'Z').to_a + ('a'..'z').to_a + ('#'..'&').to_a + (':'..'?').to_a
+  p=''
+  (0..length).each do
+    p+=chars[rand(chars.size)]
+  end
+  return p
+end

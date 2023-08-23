@@ -778,11 +778,11 @@ module RubyCA
             rescue OpenSSL::PKey::RSAError
               flash.next[:danger] = "Incorrect certificate passphrase"
               redirect "/admin/certificates/#{params[:cn]}.zip"
-              
             end
             
             begin
-              p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
+              p12_pw = random_password(128)
+              p12 = OpenSSL::PKCS12.create(p12_pw, params[:cn], deckey, cert, [root_ca, root_int_ca])
               
               zbuf = Zip::OutputStream.write_buffer do |out|
                 out.put_next_entry("vpn/#{params[:cn]}.p12")
@@ -798,7 +798,7 @@ module RubyCA
                 parms = {
                   vpn_if_name: "bitpamp",
                   vpn_server_addr: "suporte.bitpamp.com.br",
-                  epw: Base64::strict_encode64(params[:passphrase][:certificate]),
+                  epw: Base64::strict_encode64(p12_pw),
                   cn: params[:cn],
                   icn: rawintCA.cn,
                   rcn: rawCA.cn
@@ -940,7 +940,7 @@ module RubyCA
           # ATTENTION
           # Be carefull. This is a experimental issue.
           # DH generation is very slow
-          # Needs implementation of generate and save it on db
+          # Needs implementation to generate and save it on db
           
           dh = OpenSSL::PKey::DH.new(2048)
           content_type :pem
