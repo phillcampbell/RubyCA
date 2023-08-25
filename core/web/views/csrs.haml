@@ -64,10 +64,10 @@
               %input.form-control#c{ name: 'csr[c]', type: 'text', placeholder: 'e.g. GB', value: @csr.nil? ? '' : @csr[:c] }
             .form-group
               %label{ for: 'passphrase' } Key Passphrase
-              %input.form-control#passphrase{ name: 'csr[passphrase]', type: 'password', placeholder: '' }
+              %input.form-control#passphrase{ name: 'csr[passphrase]', type: 'password', autocomplete: 'off', placeholder: '' }
             .form-group
-              %label{ for: 'confirm' } Confirm Passphrase
-              %input.form-control#passphrase-confirm{ name: 'csr[confirm]', type: 'password', placeholder: '' }
+              %label{ for: 'passphrase-confirm' } Confirm Passphrase
+              %input.form-control#passphrase-confirm{ name: 'csr[confirm]', type: 'password', autocomplete: 'off', placeholder: '' }
 
           .form-group
             %button.btn.btn-primary{ type: 'submit' } Create New

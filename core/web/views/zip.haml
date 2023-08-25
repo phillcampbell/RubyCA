@@ -14,7 +14,7 @@
     %legend Enter Passphrase
     .form-group
       %label{ for: 'certificate' } Certificate Key
-      %input.form-control#certificate{ name: 'passphrase[certificate]', type: 'password', placeholder: '' }
+      %input.form-control#certificate{ name: 'passphrase[certificate]', type: 'password', autocomplete: 'off', placeholder: '' }
     .form-group  
       %label{ for: 'serveraddr' } Server Address
       %input.form-control#serveraddr{ name: 'serveraddr', type: 'text', placeholder: 'e.g. vpn.acme.com', value: @vpn_defaults['server_address'] .nil? ? '' : @vpn_defaults['server_address'] }
