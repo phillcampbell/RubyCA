@@ -59,11 +59,82 @@ jQuery( document ).ready(function( $ ) {
   
   // BS Tooltip
   $('[data-toggle="tooltip"]').tooltip();
-  $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function () {
-    var id = this.id;
+  $('[data-toggle="tooltip"]').on('shown.bs.tooltip', function(e) {
     setTimeout(function () {
-      $('#' + id).tooltip('hide'); 
-    }, 2000);
+      $(e.target).tooltip('hide'); 
+    }, 5000);
+  });
+
+  //Show and hide password input
+  $('.input-group-text.show-pass').click( function(e) {
+    const pw_input = $(this).parent().parent().find('input.form-control');
+    const bt_show_icon = $(this).find('i');
+    pw_input.focus();
+
+    if (pw_input.attr('type') === 'password'){
+      pw_input.attr('type','text');
+      
+      bt_show_icon.removeClass('fa-eye');
+      bt_show_icon.addClass('fa-eye-slash');
+      
+      bt_show_icon.parent().tooltip('hide')
+                  .attr('data-original-title', 'Hide password')
+                  .tooltip('show');
+      
+
+      //bt_show_icon.parent().tooltip('dispose').tooltip({title: 'Hide password'}).tooltip('show');                  
+
+      pw_input.one('blur', function(e) {
+        if ($(this).attr('type') === 'text' && (e.relatedTarget !== undefined && e.relatedTarget  !== null)){
+          $(this).attr('type', 'password')
+          bt_show_icon.removeClass('fa-eye-slash');
+          bt_show_icon.addClass('fa-eye');
+          
+          bt_show_icon.parent().tooltip('hide')
+                      .attr('data-original-title', 'Show password')
+                      .tooltip('show');
+          
+          //bt_show_icon.parent().tooltip('dispose').tooltip({title: 'Show password'}).tooltip('show'); 
+        }
+      });
+    }
+    else{
+      pw_input.attr('type','password');
+      bt_show_icon.removeClass('fa-eye-slash');
+      bt_show_icon.addClass('fa-eye');
+      bt_show_icon.parent().tooltip('hide')
+                  .attr('data-original-title', 'Show password')
+                  .tooltip('show');
+    }
+  });
+
+  //Generate Password
+  $('#genpw').click(function(e){
+    const pw_chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz{}()[]/\#,:;.$=+-*?!@#$%&';
+    const pw_input = $(this).parent().parent().find('#passphrase');
+    const bt_show_icon = $(this).parent().find('.input-group-text > i');
+    var password = '';
+
+    for (var i = 0; i < 30; i++) {
+      // generate password
+      gen = pw_chars.charAt(Math.floor(Math.random() * pw_chars.length));
+      password += gen;
+    }
+    pw_input.attr('type','text');
+    pw_input.val(password);
+    bt_show_icon.removeClass('fa-eye');
+    bt_show_icon.addClass('fa-eye-slash');
+    bt_show_icon.parent().tooltip('hide').attr('data-original-title', 'Hide password');
+    pw_input.focus();
+
+    pw_input.one('blur', function(e) {
+      if ($(this).attr('type') === 'text' && (e.relatedTarget !== undefined && e.relatedTarget  !== null)){
+        $(this).attr('type', 'password')
+        bt_show_icon.removeClass('fa-eye-slash');
+        bt_show_icon.addClass('fa-eye');
+        bt_show_icon.parent().tooltip('hide').attr('data-original-title', 'Show password');
+      }
+    });
   });
   
   //Tests
@@ -119,5 +190,5 @@ jQuery( document ).ready(function( $ ) {
         }
       }
     });    
-  });  
+  });
 });

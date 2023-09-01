@@ -14,11 +14,25 @@
     %legend Enter key Passphrase
     .form-group
       %label{ for: 'current_password' } Current password
-      %input.form-control#current{ name: 'passphrase[current]', type: 'password', placeholder: '' }
-      %label{ for: 'new_password' } New password
-      %input.form-control#current{ name: 'passphrase[new]', type: 'password', placeholder: '' }
-      %label{ for: 'confirm' } Confirm password
-      %input.form-control#current{ name: 'passphrase[confirm]', type: 'password', placeholder: '' }
+      %input.form-control#current_password{ name: 'passphrase[current]', type: 'password', placeholder: '' }
+    .form-group
+      %label{ for: 'passphrase' } New password
+      .input-group
+        %input.form-control#passphrase{ name: 'passphrase[new]', type: 'password', autocomplete: 'off', placeholder: '' }
+        .input-group-append
+          %span.input-group-text.show-pass{ title: 'Show password', 'data-toggle' => 'tooltip'}
+            %i.fas.fa-eye#show_eye
+          %a.btn.btn-dark#genpw{ title: 'Generate random password', 'data-toggle' => 'tooltip' }
+            %i.fas.fa-cogs
+            %span.d-none.d-md-inline Generate
+
+    .form-group
+      %label{ for: 'passphrase-confirm' } Confirm password
+      .input-group
+        %input.form-control#passphrase-confirm{ name: 'passphrase[confirm]', type: 'password', autocomplete: 'off', placeholder: '' }
+        .input-group-append
+          %span.input-group-text.show-pass{ title: 'Show password', 'data-toggle' => 'tooltip' }
+            %i.fas.fa-eye
       
     .form-group
       %button.btn.btn-primary{ type: 'submit' } Change Password
