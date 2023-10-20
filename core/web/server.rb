@@ -712,9 +712,9 @@ module RubyCA
         post '/admin/certificates/:cn.p12' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           rawCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['root']['cn']).crt
-          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn']).crt
+          rawIntCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn']).crt
           root_ca = OpenSSL::X509::Certificate.new rawCA
-          root_int_ca = OpenSSL::X509::Certificate.new rawintCA
+          root_int_ca = OpenSSL::X509::Certificate.new rawIntCA
           
           if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled"
@@ -726,12 +726,15 @@ module RubyCA
               deckey = OpenSSL::PKey::RSA.new @crt.pkey, params[:passphrase][:certificate]
             rescue OpenSSL::PKey::RSAError
               flash.next[:danger] = "Incorrect certificate passphrase"
-              redirect "/admin/certificates/#{params[:cn]}.p12"
-              
+              redirect "/admin/certificates/#{params[:cn]}.p12"             
             end
             
             begin
-              p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
+              if params[:passphrase][:legacypbe] === 'on'
+                p12 = legacy_pkcs12(params[:passphrase][:certificate], params[:cn], @crt.pkey, cert, [root_ca, root_int_ca])
+              else
+                p12 = OpenSSL::PKCS12.create(params[:passphrase][:certificate], params[:cn], deckey, cert, [root_ca, root_int_ca])
+              end
               
               session[:download_cont] = p12.to_der
               session[:download_cont_type] = :p12
@@ -739,7 +742,7 @@ module RubyCA
               haml :download
               
             rescue OpenSSL::PKCS12::PKCS12Error
-              flash.next[:danger] = "Error in pkcs12 generate"
+              flash.next[:danger] = "Error in pkcs12 generation"
               redirect "/admin/certificates/#{params[:cn]}.p12"
             end
           end
@@ -763,9 +766,9 @@ module RubyCA
         post '/admin/certificates/:cn.zip' do
           @crt = RubyCA::Core::Models::Certificate.get_by_cn(params[:cn])
           rawCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['root']['cn'])
-          rawintCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
+          rawIntCA = RubyCA::Core::Models::Certificate.get_by_cn($config['ca']['intermediate']['cn'])
           root_ca = OpenSSL::X509::Certificate.new rawCA.crt
-          root_int_ca = OpenSSL::X509::Certificate.new rawintCA.crt
+          root_int_ca = OpenSSL::X509::Certificate.new rawIntCA.crt
           
           if @crt.cn === $config['ca']['root']['cn'] or @crt.cn === $config['ca']['intermediate']['cn']
             flash.next[:danger] = "Root or intermediate pkcs12 certificates are disabled."
@@ -796,11 +799,11 @@ module RubyCA
                 
                 out.put_next_entry("vpn/vpn_cert_tool.ps1")
                 parms = {
-                  vpn_if_name: "bitpamp",
-                  vpn_server_addr: "suporte.bitpamp.com.br",
+                  vpn_if_name: params[:ifname],
+                  vpn_server_addr: params[:serveraddr],
                   epw: Base64::strict_encode64(p12_pw),
                   cn: params[:cn],
-                  icn: rawintCA.cn,
+                  icn: rawIntCA.cn,
                   rcn: rawCA.cn
                 }
                 out.write(Haml::Template.new('core/web/views/zip/vpn_cert_tool.ps1.haml').render(Object.new, parms))
